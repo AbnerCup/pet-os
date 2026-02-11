@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Upload, X, Camera, Loader2 } from 'lucide-react'
+import { uploadFile } from '@/lib/api'
+import { getPetImage } from '@/lib/utils'
 
 interface ImageUploadProps {
   value?: string
@@ -12,12 +14,19 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, petId, className = '' }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(value || null)
+  const [preview, setPreview] = useState<string | null>(getPetImage(value) || null)
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Sincronizar previsualización si el valor cambia externamente
+  useEffect(() => {
+    if (value) {
+      setPreview(getPetImage(value))
+    }
+  }, [value])
+
   const handleFileSelect = async (file: File) => {
-    if (!file || !petId) return
+    if (!file) return
 
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
@@ -38,19 +47,12 @@ export function ImageUpload({ value, onChange, petId, className = '' }: ImageUpl
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('petId', petId)
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error('Error al subir imagen')
+      if (petId) {
+        formData.append('petId', petId)
       }
 
-      const result = await response.json()
-      
+      const result = await uploadFile('/api/upload', formData)
+
       if (result.success && onChange) {
         onChange(result.imageUrl)
       }
@@ -149,7 +151,7 @@ export function ImageUpload({ value, onChange, petId, className = '' }: ImageUpl
             )}
           </div>
         )}
-        
+
         <input
           ref={fileInputRef}
           type="file"
@@ -159,7 +161,7 @@ export function ImageUpload({ value, onChange, petId, className = '' }: ImageUpl
           disabled={isUploading}
         />
       </div>
-      
+
       {!preview && (
         <button
           type="button"

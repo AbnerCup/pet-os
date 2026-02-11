@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { usePets } from '@/hooks/usePets';
 import { useAuth } from '@/hooks/useAuth';
-import { calculateAge } from '@/lib/utils';
+import { calculateAge, getPetImage } from '@/lib/utils';
 import { Plus, Search, Filter, ChevronRight, Heart, Activity, MapPin, Loader2, AlertCircle } from 'lucide-react';
 
 export default function PetsPage() {
@@ -84,7 +84,7 @@ export default function PetsPage() {
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={pet.photoUrl || 'https://via.placeholder.com/400'}
+                    src={getPetImage(pet.photoUrl, pet.species)}
                     alt={pet.name}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />

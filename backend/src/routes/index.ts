@@ -9,10 +9,11 @@ import healthRoutes from './health'
 import expensesRoutes from './expenses'
 import locationRoutes from './location'
 
+import uploadRoutes from './upload'
+
 const router = Router()
 
-// Middleware de seguridad y CORS
-router.use(corsConfig)
+// Middleware de seguridad y Rate Limiting
 router.use(generalLimiter)
 
 // Rutas de la API
@@ -21,6 +22,7 @@ router.use('/api/pets', petsRoutes)
 router.use('/api/health', healthRoutes)
 router.use('/api', expensesRoutes) // expenses/ y activities/
 router.use('/api/location', locationRoutes)
+router.use('/api/upload', uploadRoutes)
 
 
 

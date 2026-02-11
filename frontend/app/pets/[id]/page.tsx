@@ -3,8 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { usePet } from '@/hooks/usePets';
-import { useHealth } from '@/hooks/useHealth';
-import { calculateAge, formatDate } from '@/lib/utils';
+import { calculateAge, formatDate, getPetImage } from '@/lib/utils';
 import { ArrowLeft, Edit, Calendar, Activity, MapPin, Weight, Loader2, AlertCircle } from 'lucide-react';
 
 export default function PetDetailPage() {
@@ -42,9 +41,9 @@ export default function PetDetailPage() {
       <div className="bg-white rounded-2xl p-6 border border-sage-200">
         <div className="flex flex-col md:flex-row gap-6">
           <img
-            src={pet.photoUrl || 'https://via.placeholder.com/150'}
+            src={getPetImage(pet.photoUrl, pet.species)}
             alt={pet.name}
-            className="w-32 h-32 rounded-2xl object-cover"
+            className="w-32 h-32 rounded-2xl object-cover border-4 border-white shadow-md bg-white"
           />
           <div className="flex-1">
             <div className="flex items-start justify-between">
@@ -52,10 +51,10 @@ export default function PetDetailPage() {
                 <h1 className="text-3xl font-bold text-sage-900">{pet.name}</h1>
                 <p className="text-lg text-stone-600 mt-1">{pet.breed || pet.species}</p>
               </div>
-              <button className="btn-secondary flex items-center gap-2">
+              <Link href={`/pets/${pet.id}/edit`} className="btn-secondary flex items-center gap-2">
                 <Edit className="w-4 h-4" />
                 Editar
-              </button>
+              </Link>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">

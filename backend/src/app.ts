@@ -1,4 +1,5 @@
 import express from 'express'
+import path from 'path'
 import dotenv from 'dotenv'
 import helmet from 'helmet'
 import compression from 'compression'
@@ -10,6 +11,8 @@ import { morganStream } from './utils/logger'
 import { logInfo } from './utils/logger'
 import swaggerUi from 'swagger-ui-express'
 import { swaggerSpec } from './config/swagger'
+
+import { corsConfig } from './config/cors'
 
 dotenv.config()
 
@@ -24,12 +27,25 @@ logInfo('Starting Pet-OS Backend Server', {
 })
 
 // Middleware de seguridad
-app.use(helmet())
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false
+}))
+
+// CORS y cabeceras de recursos
+app.use(corsConfig)
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+})
 app.use(compression())
 
 // Middleware de logging HTTP
 app.use(morgan('combined', { stream: morganStream }))
 app.use(httpLogger)
+
+// Archivos estáticos
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
 
 // Middleware básico
 app.use(express.json({ limit: '10mb' }))

@@ -27,11 +27,12 @@ export default function NewPetPage() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     try {
       await createPet({
         ...formData,
-        weight: formData.weight ? parseFloat(formData.weight) : undefined,
+        weight: formData.weight || undefined, // Send as string
+        birthDate: formData.birthDate ? new Date(formData.birthDate).toISOString() : undefined,
       });
       router.push('/pets');
     } catch (err: any) {
@@ -44,7 +45,7 @@ export default function NewPetPage() {
   const maxPets = user?.plan === 'FREE' ? 1 : user?.plan === 'BASIC' ? 3 : 999;
 
   const handleImageChange = (photoUrl: string) => {
-    setFormData({...formData, photoUrl});
+    setFormData({ ...formData, photoUrl });
   };
 
   return (
@@ -74,7 +75,7 @@ export default function NewPetPage() {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Luna"
               className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
             />
@@ -95,7 +96,7 @@ export default function NewPetPage() {
               <label className="block text-sm font-medium text-stone-700 mb-1">Especie *</label>
               <select
                 value={formData.species}
-                onChange={(e) => setFormData({...formData, species: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, species: e.target.value })}
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
               >
                 <option value="dog">Perro</option>
@@ -109,7 +110,7 @@ export default function NewPetPage() {
               <input
                 type="text"
                 value={formData.breed}
-                onChange={(e) => setFormData({...formData, breed: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
                 placeholder="Golden Retriever"
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
               />
@@ -122,7 +123,7 @@ export default function NewPetPage() {
               <input
                 type="date"
                 value={formData.birthDate}
-                onChange={(e) => setFormData({...formData, birthDate: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
               />
             </div>
@@ -132,7 +133,7 @@ export default function NewPetPage() {
                 type="number"
                 step="0.1"
                 value={formData.weight}
-                onChange={(e) => setFormData({...formData, weight: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                 placeholder="25.5"
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-sage-500/20 focus:border-sage-500 transition-all"
               />

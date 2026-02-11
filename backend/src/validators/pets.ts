@@ -7,7 +7,7 @@ export const createPetSchema = z.object({
     breed: z.string().optional(),
     birthDate: z.string().datetime().optional(),
     weight: z.string().transform(parseFloat).optional(),
-    photoUrl: z.string().url().optional().or(z.literal('')),
+    photoUrl: z.string().optional().or(z.literal('')),
   })
 })
 
@@ -18,7 +18,7 @@ export const updatePetSchema = z.object({
     breed: z.string().optional(),
     birthDate: z.string().datetime().optional(),
     weight: z.string().transform(parseFloat).optional(),
-    photoUrl: z.string().url().optional().or(z.literal('')),
+    photoUrl: z.string().optional().or(z.literal('')),
   }),
   params: z.object({
     id: z.string().min(1, 'ID de mascota requerido')

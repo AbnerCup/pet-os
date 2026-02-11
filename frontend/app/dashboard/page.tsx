@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { usePets } from '@/hooks/usePets';
-import { formatDate, calculateAge } from '@/lib/utils';
+import { formatDate, calculateAge, getPetImage } from '@/lib/utils';
 import {
   PawPrint,
   Calendar,
@@ -16,9 +16,15 @@ import {
   CheckCircle2,
   Clock,
   TrendingUp,
+  MoreVertical,
+  User,
+  Edit3,
+  CircleDollarSign,
   ChevronRight,
   Loader2
 } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -41,13 +47,13 @@ export default function DashboardPage() {
     );
   }
 
-  const totalExpenses = pets.reduce((sum: number, pet: any) => {
+  const totalExpenses = Array.isArray(pets) ? pets.reduce((sum: number, pet: any) => {
     return sum + (pet.expenses?.reduce((s: number, e: any) => s + parseFloat(e.amount), 0) || 0);
-  }, 0);
+  }, 0) : 0;
 
-  const pendingHealth = pets.reduce((count: number, pet: any) => {
+  const pendingHealth = Array.isArray(pets) ? pets.reduce((count: number, pet: any) => {
     return count + (pet.healthRecords?.filter((h: any) => h.status === 'pending').length || 0);
-  }, 0);
+  }, 0) : 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -85,7 +91,7 @@ export default function DashboardPage() {
         <StatCard
           icon={Activity}
           label="Actividades"
-          value={pets.reduce((sum: number, p: any) => sum + (p.activities?.length || 0), 0)}
+          value={Array.isArray(pets) ? pets.reduce((sum: number, p: any) => sum + (p.activities?.length || 0), 0) : 0}
           color="sage"
         />
       </div>
@@ -101,17 +107,17 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pets.map((pet: any, index: number) => (
+            {Array.isArray(pets) && pets.map((pet: any, index: number) => (
               <motion.div
                 key={pet.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <PetCard 
-                  pet={pet} 
-                  isSelected={selectedPet?.id === pet.id} 
-                  onClick={() => setSelectedPet(pet)} 
+                <PetCard
+                  pet={pet}
+                  isSelected={selectedPet?.id === pet.id}
+                  onClick={() => setSelectedPet(pet)}
                 />
               </motion.div>
             ))}
@@ -153,29 +159,78 @@ function StatCard({ icon: Icon, label, value, color }: any) {
 }
 
 function PetCard({ pet, isSelected, onClick }: any) {
+  const [showMenu, setShowMenu] = useState(false);
   const age = pet.birthDate ? calculateAge(pet.birthDate) : '-';
 
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-2xl p-4 border-2 cursor-pointer transition-all ${
-        isSelected ? 'border-sage-600 shadow-md' : 'border-sage-200 hover:border-sage-300'
-      }`}
+      className={`relative bg-white rounded-2xl p-4 border-2 cursor-pointer transition-all ${isSelected ? 'border-sage-600 shadow-md' : 'border-sage-200 hover:border-sage-300'
+        }`}
     >
       <div className="flex items-center gap-4">
         <img
-          src={pet.photoUrl || 'https://via.placeholder.com/150'}
+          src={getPetImage(pet.photoUrl, pet.species)}
           alt={pet.name}
-          className="w-16 h-16 rounded-xl object-cover"
+          className="w-16 h-16 rounded-xl object-cover border border-sage-100 shadow-sm"
         />
         <div className="flex-1">
           <h3 className="font-semibold text-sage-900">{pet.name}</h3>
           <p className="text-sm text-stone-600">{pet.breed || pet.species}</p>
           <p className="text-xs text-stone-500">{age} años • {pet.weight}kg</p>
         </div>
-        <ChevronRight className={`w-5 h-5 transition-transform ${isSelected ? 'rotate-90 text-sage-600' : 'text-stone-400'}`} />
+
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+            className="p-2 hover:bg-sage-50 rounded-lg text-stone-400 hover:text-sage-600 transition-colors"
+          >
+            <MoreVertical className="w-5 h-5" />
+          </button>
+
+          <AnimatePresence>
+            {showMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                  }}
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-sage-100 py-2 z-20"
+                >
+                  <MenuLink href={`/pets/${pet.id}`} icon={User} label="Ver Perfil" />
+                  <MenuLink href={`/pets/${pet.id}/edit`} icon={Edit3} label="Editar Datos" />
+                  <MenuLink href="/expenses" icon={CircleDollarSign} label="Añadir Gasto" />
+                  <MenuLink href="/activity" icon={Activity} label="Nueva Actividad" />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
+  );
+}
+
+function MenuLink({ href, icon: Icon, label }: any) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 px-4 py-2 text-sm text-stone-600 hover:bg-sage-50 hover:text-sage-700 transition-colors"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Icon className="w-4 h-4" />
+      {label}
+    </Link>
   );
 }
 

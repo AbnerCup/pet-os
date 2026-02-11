@@ -1,0 +1,6 @@
+  const upgradePlan = async (newPlan: string) => {
+    setUser(prev => prev ? { ...prev, plan: newPlan as "FREE" | "BASIC" | "FAMILY" } : null)
+    return Promise.resolve()
+  }
+
+  return { user, loading, login, register, logout, upgradePlan, isAuthenticated: !!user }

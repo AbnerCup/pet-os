@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phone         String?   @unique
+  password      String
+  name          String
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  pets     Pet[]
+}
+
+model Pet {
+  id        String   @id @default(cuid())
+  name      String
+  species   String
+  breed     String?
+  birthDate DateTime?
+  weight    Float?
+  photoUrl  String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  healthRecords HealthRecord[]
+  activities    Activity[]
+  locations     LocationLog[]
+  expenses      Expense[]
+
+  @@index([userId])
+}
+
+model HealthRecord {
+  id        String   @id @default(cuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  date      DateTime
+  nextDate  DateTime?
+  vetName   String?
+  notes     String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+
+  @@index([petId])
+}
+
+model LocationLog {
+  id        String   @id @default(cuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  accuracy  Float?
+  battery   Int?
+  timestamp DateTime @default(now())
+
+  @@index([petId, timestamp])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type      String
+  duration  Int
+  date      DateTime
+  notes     String?
+
+  @@index([petId])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  userId      String
+  category    String
+  amount      Decimal  @db.Decimal(10, 2)
+  date        DateTime
+  description String?
+
+  @@index([userId])
+}
+
+enum Plan {
+  FREE
+  BASIC
+  FAMILY
+}

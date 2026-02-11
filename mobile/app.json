@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Pet OS",
+    "slug": "pet-os-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#7c9a6b"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.petos.mobile",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Pet OS necesita acceso a tu ubicaci\u00f3n para mostrar el mapa de mascotas",
+        "NSLocationAlwaysUsageDescription": "Pet OS usa tu ubicaci\u00f3n para alertas de zonas seguras"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#7c9a6b"
+      },
+      "package": "com.petos.mobile",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Pet OS necesita acceso a tu ubicaci\u00f3n para mostrar el mapa de mascotas"
+        }
+      ],
+      "expo-notifications"
+    ],
+    "sdkVersion": "54.0.0"
+  }
+}

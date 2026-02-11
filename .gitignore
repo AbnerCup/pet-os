@@ -1,0 +1,75 @@
+# ==========================================
+# Restricción Personalizada
+# ==========================================
+*.md                # Ignora todos los archivos Markdown (según tu petición)
+!README.md          # (Opcional) Descomenta si quieres mantener el README principal
+
+# ==========================================
+# Dependencias y Build
+# ==========================================
+node_modules/
+dist/
+build/
+.next/
+out/
+.expo/
+*.log
+
+# ==========================================
+# Variables de Entorno (¡Seguridad primero!)
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env.bak
+
+# ==========================================
+# Next.js (Web)
+# ==========================================
+.next/
+next-env.d.ts       # Opcional: si prefieres que se regenere solo
+.vercel             # Si usas Vercel para el deploy
+
+# ==========================================
+# React Native + Expo (Móvil)
+# ==========================================
+.expo/*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos específicos de plataformas nativas (si haces eject o usas prebuild)
+android/
+ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# ==========================================
+# Node.js + Express (Backend)
+# ==========================================
+pids
+*.pid
+*.seed
+*.pid.lock
+lib-cov
+coverage
+.nyc_output
+
+# ==========================================
+# PostgreSQL & Herramientas de DB
+# ==========================================
+pgdata/             # Si usas Docker para la DB local
+.db_backups/
+
+# ==========================================
+# Sistemas Operativos y Editores
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

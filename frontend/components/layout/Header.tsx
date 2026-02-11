@@ -2,6 +2,7 @@
 
 import { Bell, Search, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { NotificationsDropdown } from './NotificationsDropdown';
 
 export function Header() {
   return (
@@ -25,10 +26,7 @@ export function Header() {
           <span className="hidden sm:inline">Nueva Mascota</span>
         </Link>
 
-        <button className="relative p-2 text-stone-600 hover:bg-sage-50 rounded-xl transition-colors">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-amber-500 rounded-full" />
-        </button>
+        <NotificationsDropdown />
       </div>
     </header>
   );

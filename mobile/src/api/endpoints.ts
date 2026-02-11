@@ -54,6 +54,14 @@ export const locationApi = {
   create: (data: { petId: string; latitude: number; longitude: number; accuracy?: number; battery?: number }) =>
     api.post<ApiResponse<Location>>('/location', data),
 
+  // GET /api/location/latest — última ubicación de TODAS las mascotas
+  getLatestAll: () =>
+    api.get<ApiResponse<{ pet: Pet; location: Location | null }[]>>('/location/latest'),
+
+  // POST /api/location/bulk — registrar múltiples
+  createBulk: (data: { locations: any[] }) =>
+    api.post<ApiResponse<{ count: number }>>('/location/bulk', data),
+
   // Alias para compatibilidad
   getHistory: (petId: string, limit?: number) =>
     api.get<ApiResponse<any[]>>('/location', { params: { petId, limit: limit || 100 } }),

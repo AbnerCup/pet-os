@@ -31,12 +31,12 @@ export const useLocationHistory = (petId: string, limit?: number) => {
 
 export const useAllLocations = () => {
   return useQuery({
-    queryKey: ['all-locations'],
+    queryKey: ['all-locations-latest'],
     queryFn: async () => {
-      const response = await locationApi.getAll(undefined, 50);
+      const response = await locationApi.getLatestAll();
       return response.data?.data || response.data || [];
     },
-    refetchInterval: 60000, // Cada minuto
+    refetchInterval: 30000,
   });
 };
 

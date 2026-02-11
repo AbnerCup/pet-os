@@ -16,19 +16,19 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
+import * as ExpoLocation from 'expo-location';
+
 import { usePets } from '../../hooks/usePets';
 import { useAllLocations, useCreateLocation } from '../../hooks/useLocation';
 import { locationApi } from '../../api/endpoints';
 import { Pet } from '../../types';
 import { RootStackParamList } from '../../navigation/types';
 import { getPetImage } from '../../utils/helpers';
-import * as ExpoLocation from 'expo-location';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const MAP_HEIGHT = SCREEN_HEIGHT * 0.35; // 35% de la pantalla es el mapa
 
-// ──────────────────────────────────────────────
-//  Componente: PetLocationCard
-// ──────────────────────────────────────────────
 const PetLocationCard = ({
     pet,
     location,
@@ -72,7 +72,7 @@ const PetLocationCard = ({
                 />
                 <View style={styles.petCardInfo}>
                     <Text style={styles.petCardName}>{pet.name}</Text>
-                    <Text style={styles.petCardBreed}>{pet.breed || pet.species}</Text>
+                    <Text style={[styles.petCardBreed, { textTransform: 'capitalize' }]}>{pet.species} • {pet.breed}</Text>
                 </View>
                 <View style={[
                     styles.statusDot,
@@ -83,56 +83,50 @@ const PetLocationCard = ({
             {location ? (
                 <View style={styles.locationInfo}>
                     <View style={styles.locationRow}>
-                        <Ionicons name="location" size={16} color="#4a90e2" />
-                        <Text style={styles.coordsText}>
-                            {location.latitude?.toFixed(6)}, {location.longitude?.toFixed(6)}
-                        </Text>
-                    </View>
-                    <View style={styles.locationRow}>
-                        <Ionicons name="time-outline" size={16} color="#999" />
+                        <Ionicons name="time-outline" size={14} color="#999" />
                         <Text style={styles.timeText}>
-                            {timeSince(location.timestamp)}
+                            Actualizado: {timeSince(location.timestamp)}
                         </Text>
                     </View>
-                    {location.battery !== null && location.battery !== undefined && (
-                        <View style={styles.locationRow}>
-                            <Ionicons
-                                name={location.battery > 20 ? "battery-half" : "battery-dead"}
-                                size={16}
-                                color={location.battery > 20 ? '#34c759' : '#ff3b30'}
-                            />
-                            <Text style={styles.batteryText}>{location.battery}%</Text>
+                    <View style={styles.locationTags}>
+                        {location.battery !== null && (
+                            <View style={styles.tag}>
+                                <Ionicons
+                                    name={location.battery > 20 ? "battery-half" : "battery-dead"}
+                                    size={12}
+                                    color={location.battery > 20 ? '#34c759' : '#ff3b30'}
+                                />
+                                <Text style={styles.tagText}>{location.battery}%</Text>
+                            </View>
+                        )}
+                        <View style={styles.tag}>
+                            <Ionicons name="navigate-outline" size={12} color="#4a90e2" />
+                            <Text style={styles.tagText}>
+                                {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+                            </Text>
                         </View>
-                    )}
+                    </View>
                 </View>
             ) : (
                 <View style={styles.noLocationContainer}>
-                    <Ionicons name="location-outline" size={24} color="#ccc" />
-                    <Text style={styles.noLocationText}>Sin ubicación registrada</Text>
+                    <Text style={styles.noLocationText}>Sin ubicación reciente</Text>
                 </View>
             )}
 
-            <View style={styles.petCardActions}>
-                <TouchableOpacity
-                    style={styles.trackButton}
-                    onPress={onTrack}
-                >
-                    <Ionicons name="navigate" size={16} color="#fff" />
-                    <Text style={styles.trackButtonText}>Rastrear</Text>
+            <View style={styles.cardActions}>
+                <TouchableOpacity style={styles.actionButtonMain} onPress={onTrack}>
+                    <Ionicons name="map" size={16} color="#fff" />
+                    <Text style={styles.actionButtonTextMain}>Ver en Mapa</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
-                    style={[styles.updateButton, isUpdating && styles.disabledBtn]}
+                    style={[styles.actionButtonSecondary, isUpdating && styles.disabledBtn]}
                     onPress={onUpdateLocation}
                     disabled={isUpdating}
                 >
                     {isUpdating ? (
                         <ActivityIndicator size="small" color="#4a90e2" />
                     ) : (
-                        <>
-                            <Ionicons name="locate" size={16} color="#4a90e2" />
-                            <Text style={styles.updateButtonText}>GPS</Text>
-                        </>
+                        <Ionicons name="locate" size={18} color="#4a90e2" />
                     )}
                 </TouchableOpacity>
             </View>
@@ -140,661 +134,390 @@ const PetLocationCard = ({
     );
 };
 
-// ──────────────────────────────────────────────
-//  Componente: QuickStatCard
-// ──────────────────────────────────────────────
-const QuickStatCard = ({
-    icon,
-    value,
-    label,
-    color,
-}: {
-    icon: keyof typeof Ionicons.glyphMap;
-    value: string | number;
-    label: string;
-    color: string;
-}) => (
-    <View style={styles.quickStatCard}>
-        <View style={[styles.quickStatIcon, { backgroundColor: color + '20' }]}>
-            <Ionicons name={icon} size={20} color={color} />
-        </View>
-        <Text style={styles.quickStatValue}>{value}</Text>
-        <Text style={styles.quickStatLabel}>{label}</Text>
-    </View>
-);
-
-// ──────────────────────────────────────────────
-//  Componente Principal: LocationScreen
-// ──────────────────────────────────────────────
 export const LocationScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const mapRef = useRef<MapView>(null);
+
+    // Hooks
     const { data: pets, isLoading: isPetsLoading, refetch: refetchPets } = usePets();
+    const { data: latestLocations, isLoading: isLocLoading, refetch: refetchLocations } = useAllLocations();
     const createLocationMutation = useCreateLocation();
 
-    const [petLocations, setPetLocations] = useState<Record<string, any>>({});
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [updatingPetId, setUpdatingPetId] = useState<string | null>(null);
-    const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-    // ── Cargar ubicaciones de todas las mascotas ──
-    const fetchAllLocations = useCallback(async () => {
-        if (!pets || pets.length === 0) return;
+    // Combinar datos: pets + sus ubicaciones
+    const petsWithLoc = pets?.map(pet => {
+        const locEntry = latestLocations?.find((l: any) => l.pet.id === pet.id);
+        return {
+            ...pet,
+            location: locEntry?.location || null
+        };
+    }) || [];
 
-        try {
-            const locMap: Record<string, any> = {};
-
-            for (const pet of pets) {
-                try {
-                    const res = await locationApi.getCurrent(pet.id);
-                    const data = res.data?.data || res.data;
-                    if (Array.isArray(data) && data.length > 0) {
-                        locMap[pet.id] = data[0];
-                    }
-                } catch {
-                    // Sin ubicación para esta mascota
-                }
-            }
-
-            setPetLocations(locMap);
-            setLastRefresh(new Date());
-        } catch (error) {
-            console.error('Error fetching locations:', error);
-        }
-    }, [pets]);
-
+    // Auto-zoom mapa al cargar
     useEffect(() => {
-        fetchAllLocations();
-        const interval = setInterval(fetchAllLocations, 60000);
-        return () => clearInterval(interval);
-    }, [fetchAllLocations]);
+        if (latestLocations && latestLocations.length > 0 && mapRef.current) {
+            const coords = latestLocations
+                .filter((l: any) => l.location)
+                .map((l: any) => ({
+                    latitude: l.location.latitude,
+                    longitude: l.location.longitude
+                }));
+
+            if (coords.length > 0) {
+                mapRef.current.fitToCoordinates(coords, {
+                    edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+                    animated: true,
+                });
+            }
+        }
+    }, [latestLocations]);
 
     const onRefresh = async () => {
         setIsRefreshing(true);
-        await Promise.all([refetchPets(), fetchAllLocations()]);
+        await Promise.all([refetchPets(), refetchLocations()]);
         setIsRefreshing(false);
     };
 
-    // ── Registrar ubicación GPS del teléfono para una mascota ──
     const handleUpdateLocationGPS = async (petId: string) => {
         setUpdatingPetId(petId);
         try {
             const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
-                Alert.alert(
-                    'Permisos necesarios',
-                    'Se necesitan permisos de ubicación para registrar la posición de tu mascota.',
-                    [{ text: 'OK' }]
-                );
+                Alert.alert('Error', 'Se requiere permiso de ubicación.');
                 return;
             }
-
-            const location = await ExpoLocation.getCurrentPositionAsync({
-                accuracy: ExpoLocation.Accuracy.High,
-            });
-
+            const location = await ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High });
             await createLocationMutation.mutateAsync({
                 petId,
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
                 accuracy: location.coords.accuracy || undefined,
+                battery: 100
             });
-
-            // Actualizar localmente
-            setPetLocations(prev => ({
-                ...prev,
-                [petId]: {
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                    accuracy: location.coords.accuracy,
-                    timestamp: new Date().toISOString(),
-                },
-            }));
-
-            Alert.alert('✅ Ubicación registrada', 'La posición GPS se ha guardado correctamente.');
-        } catch (error: any) {
-            console.error('Error updating GPS location:', error);
-            Alert.alert('Error', error.response?.data?.error || 'No se pudo registrar la ubicación. Verifica tu conexión y permisos.');
+            Alert.alert('Éxito', 'Ubicación actualizada');
+            refetchLocations();
+        } catch (error) {
+            Alert.alert('Error', 'No se pudo actualizar la ubicación.');
         } finally {
             setUpdatingPetId(null);
         }
     };
 
-    // ── Estadísticas rápidas ──
-    const petsWithLocation = Object.keys(petLocations).length;
-    const totalPets = pets?.length || 0;
-    const recentLocations = Object.values(petLocations).filter((loc: any) => {
-        if (!loc?.timestamp) return false;
-        const diff = Date.now() - new Date(loc.timestamp).getTime();
-        return diff < 3600000; // Última hora
-    }).length;
-
-    // ── Loading ──
-    if (isPetsLoading) {
-        return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
-                <Text style={styles.loadingText}>Cargando mascotas...</Text>
-            </View>
-        );
-    }
+    const petsWithSignal = petsWithLoc.filter(p => p.location).length;
 
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={styles.contentContainer}
-            refreshControl={
-                <RefreshControl
-                    refreshing={isRefreshing}
-                    onRefresh={onRefresh}
-                    tintColor="#7c9a6b"
-                    colors={['#7c9a6b']}
-                />
-            }
-        >
-            {/* ── Header con gradiente visual ── */}
-            <View style={styles.headerSection}>
-                <View style={styles.headerGradient}>
-                    <View style={styles.headerContent}>
-                        <View style={styles.headerTop}>
-                            <View>
-                                <Text style={styles.headerTitle}>📍 Ubicación</Text>
-                                <Text style={styles.headerSubtitle}>
-                                    Rastreo GPS de tus mascotas
-                                </Text>
-                            </View>
-                            <TouchableOpacity
-                                style={styles.refreshButton}
-                                onPress={onRefresh}
+        <View style={styles.container}>
+            {/* ── MAPA SUPERIOR ── */}
+            <View style={styles.mapContainer}>
+                <MapView
+                    ref={mapRef}
+                    provider={PROVIDER_DEFAULT}
+                    style={styles.map}
+                    initialRegion={{
+                        latitude: -17.7833,
+                        longitude: -63.1821,
+                        latitudeDelta: 0.05,
+                        longitudeDelta: 0.05,
+                    }}
+                >
+                    {petsWithLoc.map(pet => (
+                        pet.location && (
+                            <Marker
+                                key={pet.id}
+                                coordinate={{
+                                    latitude: pet.location.latitude,
+                                    longitude: pet.location.longitude
+                                }}
+                                title={pet.name}
+                                onPress={() => navigation.navigate('PetTracking', { petId: pet.id })}
                             >
-                                <Ionicons name="refresh" size={22} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
+                                <View style={styles.markerContainer}>
+                                    <Image
+                                        source={{ uri: getPetImage(pet.photoUrl, pet.species) }}
+                                        style={styles.markerImage}
+                                    />
+                                    <View style={styles.markerBadge} />
+                                </View>
+                            </Marker>
+                        )
+                    ))}
+                </MapView>
 
-                        {/* Última actualización */}
-                        <View style={styles.lastUpdateRow}>
-                            <Ionicons name="time-outline" size={14} color="rgba(255,255,255,0.7)" />
-                            <Text style={styles.lastUpdateText}>
-                                Última actualización: {lastRefresh.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
-                            </Text>
-                        </View>
+                {/* Overlay Header sobre Mapa */}
+                <View style={styles.mapHeaderOverlay}>
+                    <TouchableOpacity style={styles.refreshBtnMap} onPress={onRefresh}>
+                        <Ionicons name="refresh" size={20} color="#333" />
+                    </TouchableOpacity>
+                    <View style={styles.mapBadge}>
+                        <Text style={styles.mapBadgeText}>{petsWithSignal} en línea</Text>
                     </View>
                 </View>
             </View>
 
-            {/* ── Stats rápidas ── */}
-            <View style={styles.statsRow}>
-                <QuickStatCard
-                    icon="paw"
-                    value={totalPets}
-                    label="Mascotas"
-                    color="#7c9a6b"
-                />
-                <QuickStatCard
-                    icon="location"
-                    value={petsWithLocation}
-                    label="Localizadas"
-                    color="#4a90e2"
-                />
-                <QuickStatCard
-                    icon="radio-button-on"
-                    value={recentLocations}
-                    label="En línea"
-                    color="#34c759"
-                />
+            {/* ── LISTA INFERIOR ── */}
+            <View style={styles.listContainer}>
+                <View style={styles.handleBar} />
+                <Text style={styles.listTitle}>Mis Mascotas</Text>
+
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
+                >
+                    {isPetsLoading ? (
+                        <ActivityIndicator color="#7c9a6b" style={{ marginTop: 20 }} />
+                    ) : (
+                        petsWithLoc.map(pet => (
+                            <PetLocationCard
+                                key={pet.id}
+                                pet={pet}
+                                location={pet.location}
+                                onTrack={() => navigation.navigate('PetTracking', { petId: pet.id })}
+                                onUpdateLocation={() => handleUpdateLocationGPS(pet.id)}
+                                isUpdating={updatingPetId === pet.id}
+                            />
+                        ))
+                    )}
+                    <View style={{ height: 40 }} />
+                </ScrollView>
             </View>
-
-            {/* ── Lista de mascotas con ubicación ── */}
-            <View style={styles.sectionContainer}>
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Mis Mascotas</Text>
-                    <Text style={styles.sectionBadge}>
-                        {petsWithLocation}/{totalPets} con GPS
-                    </Text>
-                </View>
-
-                {(!pets || pets.length === 0) ? (
-                    <View style={styles.emptyState}>
-                        <Ionicons name="paw-outline" size={56} color="#ddd" />
-                        <Text style={styles.emptyTitle}>Sin mascotas registradas</Text>
-                        <Text style={styles.emptySubtext}>
-                            Agrega una mascota para comenzar el rastreo GPS
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.addPetButton}
-                            onPress={() => navigation.navigate('AddPet')}
-                        >
-                            <Ionicons name="add" size={20} color="#fff" />
-                            <Text style={styles.addPetButtonText}>Agregar Mascota</Text>
-                        </TouchableOpacity>
-                    </View>
-                ) : (
-                    pets.map((pet: Pet) => (
-                        <PetLocationCard
-                            key={pet.id}
-                            pet={pet}
-                            location={petLocations[pet.id]}
-                            onTrack={() => navigation.navigate('PetTracking', { petId: pet.id })}
-                            onUpdateLocation={() => handleUpdateLocationGPS(pet.id)}
-                            isUpdating={updatingPetId === pet.id}
-                        />
-                    ))
-                )}
-            </View>
-
-            {/* ── Sección informativa: Cómo funciona ── */}
-            <View style={styles.infoSection}>
-                <Text style={styles.infoTitle}>🛰️ ¿Cómo funciona?</Text>
-                <View style={styles.infoCard}>
-                    <View style={styles.infoStep}>
-                        <View style={[styles.stepNumber, { backgroundColor: '#e8f5e9' }]}>
-                            <Text style={[styles.stepNumberText, { color: '#7c9a6b' }]}>1</Text>
-                        </View>
-                        <View style={styles.stepContent}>
-                            <Text style={styles.stepTitle}>Registrar ubicación</Text>
-                            <Text style={styles.stepDesc}>
-                                Pulsa "GPS" en la tarjeta de tu mascota para registrar tu ubicación actual como posición de la mascota.
-                            </Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.stepDivider} />
-
-                    <View style={styles.infoStep}>
-                        <View style={[styles.stepNumber, { backgroundColor: '#e3f2fd' }]}>
-                            <Text style={[styles.stepNumberText, { color: '#4a90e2' }]}>2</Text>
-                        </View>
-                        <View style={styles.stepContent}>
-                            <Text style={styles.stepTitle}>Rastrear en mapa</Text>
-                            <Text style={styles.stepDesc}>
-                                Pulsa "Rastrear" para ver la ubicación en el mapa con actualizaciones en tiempo real.
-                            </Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.stepDivider} />
-
-                    <View style={styles.infoStep}>
-                        <View style={[styles.stepNumber, { backgroundColor: '#fff3e0' }]}>
-                            <Text style={[styles.stepNumberText, { color: '#f5a623' }]}>3</Text>
-                        </View>
-                        <View style={styles.stepContent}>
-                            <Text style={styles.stepTitle}>Historial</Text>
-                            <Text style={styles.stepDesc}>
-                                Revisa el historial de posiciones para conocer las rutas y movimientos.
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            </View>
-
-            {/* Bottom spacer */}
-            <View style={{ height: 30 }} />
-        </ScrollView>
+        </View>
     );
 };
 
-// ──────────────────────────────────────────────
-//  Estilos
-// ──────────────────────────────────────────────
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f6f8',
+        backgroundColor: '#fff',
     },
-    contentContainer: {
-        paddingBottom: 20,
+    mapContainer: {
+        height: MAP_HEIGHT,
+        width: '100%',
+        position: 'relative',
     },
-    centerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f5f6f8',
+    map: {
+        ...StyleSheet.absoluteFillObject,
     },
-    loadingText: {
-        marginTop: 12,
-        color: '#999',
-        fontSize: 14,
-    },
-
-    // ── Header ──
-    headerSection: {
-        marginBottom: 0,
-    },
-    headerGradient: {
-        backgroundColor: '#7c9a6b',
-        paddingTop: 12,
-        paddingBottom: 28,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-    },
-    headerContent: {
-        paddingHorizontal: 20,
-    },
-    headerTop: {
+    mapHeaderOverlay: {
+        position: 'absolute',
+        top: Platform.OS === 'ios' ? 50 : 40,
+        right: 20,
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    headerTitle: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-    headerSubtitle: {
-        fontSize: 14,
-        color: 'rgba(255,255,255,0.8)',
-        marginTop: 4,
-    },
-    refreshButton: {
-        backgroundColor: 'rgba(255,255,255,0.2)',
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    lastUpdateRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 12,
-        gap: 6,
-    },
-    lastUpdateText: {
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.7)',
-    },
-
-    // ── Quick Stats ──
-    statsRow: {
-        flexDirection: 'row',
-        paddingHorizontal: 16,
-        marginTop: -16,
         gap: 10,
     },
-    quickStatCard: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 14,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 3,
-    },
-    quickStatIcon: {
+    refreshBtnMap: {
         width: 36,
         height: 36,
+        backgroundColor: '#fff',
         borderRadius: 18,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 4,
     },
-    quickStatValue: {
+    mapBadge: {
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        paddingHorizontal: 12,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 4,
+    },
+    mapBadgeText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#4a90e2',
+    },
+
+    // Marker
+    markerContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    markerImage: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        borderWidth: 3,
+        borderColor: '#fff',
+        backgroundColor: '#eee',
+    },
+    markerBadge: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#34c759',
+        borderWidth: 2,
+        borderColor: '#fff',
+    },
+
+    // Lista Inferior
+    listContainer: {
+        flex: 1,
+        backgroundColor: '#f5f6f8',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        marginTop: -20,
+        overflow: 'hidden',
+        paddingHorizontal: 20,
+        paddingTop: 12,
+    },
+    handleBar: {
+        width: 40,
+        height: 4,
+        backgroundColor: '#ddd',
+        borderRadius: 2,
+        alignSelf: 'center',
+        marginBottom: 16,
+    },
+    listTitle: {
         fontSize: 20,
         fontWeight: 'bold',
         color: '#333',
-    },
-    quickStatLabel: {
-        fontSize: 11,
-        color: '#999',
-        marginTop: 2,
-    },
-
-    // ── Section ──
-    sectionContainer: {
-        paddingHorizontal: 16,
-        marginTop: 24,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: 16,
     },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    sectionBadge: {
-        fontSize: 12,
-        color: '#7c9a6b',
-        fontWeight: '600',
-        backgroundColor: '#e8f5e9',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
+    scrollContent: {
+        paddingBottom: 20,
     },
 
-    // ── Pet Location Card ──
+    // Cards
     petLocationCard: {
         backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 18,
-        marginBottom: 14,
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 12,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        elevation: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 2,
     },
     petCardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
+        marginBottom: 12,
     },
     petAvatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         backgroundColor: '#eee',
     },
     petCardInfo: {
         flex: 1,
-        marginLeft: 14,
+        marginLeft: 12,
     },
     petCardName: {
-        fontSize: 17,
-        fontWeight: '700',
+        fontSize: 16,
+        fontWeight: 'bold',
         color: '#333',
     },
     petCardBreed: {
-        fontSize: 13,
-        color: '#999',
+        fontSize: 12,
+        color: '#888',
         marginTop: 2,
     },
     statusDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        borderWidth: 2,
-        borderColor: '#fff',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
+        width: 10,
+        height: 10,
+        borderRadius: 5,
     },
-
-    // ── Location Info ──
     locationInfo: {
-        marginTop: 14,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#f9f9f9',
         borderRadius: 12,
         padding: 12,
-        gap: 8,
     },
     locationRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-    },
-    coordsText: {
-        fontSize: 13,
-        color: '#555',
-        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+        gap: 6,
+        marginBottom: 8,
     },
     timeText: {
-        fontSize: 13,
-        color: '#999',
+        fontSize: 12,
+        color: '#666',
+        fontWeight: '500',
     },
-    batteryText: {
-        fontSize: 13,
+    locationTags: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    tag: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 8,
+        gap: 4,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    tagText: {
+        fontSize: 11,
         color: '#666',
     },
     noLocationContainer: {
-        marginTop: 14,
+        padding: 12,
+        alignItems: 'center',
         backgroundColor: '#fafafa',
         borderRadius: 12,
-        padding: 20,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#f0f0f0',
         borderStyle: 'dashed',
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
     },
     noLocationText: {
-        fontSize: 13,
-        color: '#bbb',
-        marginTop: 6,
+        fontSize: 12,
+        color: '#aaa',
+        fontStyle: 'italic',
     },
-
-    // ── Card Actions ──
-    petCardActions: {
+    cardActions: {
         flexDirection: 'row',
         marginTop: 14,
         gap: 10,
     },
-    trackButton: {
+    actionButtonMain: {
         flex: 1,
+        backgroundColor: '#4a90e2',
+        borderRadius: 12,
+        height: 40,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#7c9a6b',
-        borderRadius: 12,
-        paddingVertical: 11,
-        gap: 6,
-        shadowColor: '#7c9a6b',
+        gap: 8,
+        shadowColor: '#4a90e2',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 2,
+        shadowRadius: 3,
+        elevation: 3,
     },
-    trackButtonText: {
+    actionButtonTextMain: {
         color: '#fff',
         fontWeight: '600',
-        fontSize: 14,
+        fontSize: 13,
     },
-    updateButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
+    actionButtonSecondary: {
+        width: 44,
+        height: 40,
         backgroundColor: '#e3f2fd',
-        borderRadius: 12,
-        paddingVertical: 11,
-        gap: 6,
-    },
-    updateButtonText: {
-        color: '#4a90e2',
-        fontWeight: '600',
-        fontSize: 14,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#badaf5',
     },
     disabledBtn: {
-        opacity: 0.6,
-    },
-
-    // ── Empty State ──
-    emptyState: {
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 40,
-        alignItems: 'center',
-    },
-    emptyTitle: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: '#666',
-        marginTop: 16,
-    },
-    emptySubtext: {
-        fontSize: 13,
-        color: '#bbb',
-        textAlign: 'center',
-        marginTop: 8,
-        lineHeight: 20,
-    },
-    addPetButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#7c9a6b',
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 25,
-        marginTop: 20,
-        gap: 6,
-    },
-    addPetButtonText: {
-        color: '#fff',
-        fontWeight: '600',
-        fontSize: 14,
-    },
-
-    // ── Info Section ──
-    infoSection: {
-        paddingHorizontal: 16,
-        marginTop: 28,
-    },
-    infoTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 14,
-    },
-    infoCard: {
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        elevation: 2,
-    },
-    infoStep: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    stepNumber: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 14,
-    },
-    stepNumberText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    stepContent: {
-        flex: 1,
-    },
-    stepTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#333',
-    },
-    stepDesc: {
-        fontSize: 13,
-        color: '#999',
-        marginTop: 4,
-        lineHeight: 19,
-    },
-    stepDivider: {
-        height: 1,
-        backgroundColor: '#f0f0f0',
-        marginVertical: 14,
-        marginLeft: 46,
+        opacity: 0.5,
     },
 });

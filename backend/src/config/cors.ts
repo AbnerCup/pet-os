@@ -24,9 +24,14 @@ if (process.env.EXPO_PUBLIC_API_URL) {
 
 export const corsConfig = cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Permitir requests sin origen (curl, mobile apps) o locales
+    if (!origin ||
+      origin.startsWith('http://localhost') ||
+      origin.startsWith('http://192.168.') ||
+      origin.startsWith('exp://')) {
       callback(null, true)
     } else {
+      console.log('Bloqueado por CORS:', origin);
       callback(new Error('Not allowed by CORS'))
     }
   },

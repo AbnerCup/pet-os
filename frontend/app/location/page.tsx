@@ -1,226 +1,233 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { usePets } from '@/hooks/usePets'
-import { MapPin, Navigation, Clock, AlertTriangle, Crown } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { MapPin, Battery, RefreshCw, AlertTriangle } from 'lucide-react'
+
+// Importar mapa dinámicamente (solo cliente)
+const PetMap = dynamic(
+  () => import('../../components/location/PetMap'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-96 bg-sage-50 rounded-xl flex items-center justify-center animate-pulse">
+        <MapPin className="w-12 h-12 text-sage-300" />
+      </div>
+    )
+  }
+)
+
+interface PetLocationData {
+  pet: {
+    id: string
+    name: string
+    photoUrl?: string | null
+    species: string
+    breed?: string
+  }
+  location: {
+    latitude: number
+    longitude: number
+    timestamp: string
+    battery?: number | null
+    accuracy?: number | null
+  } | null
+}
+
+const ENV_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+const API_URL = ENV_URL.endsWith('/api') ? ENV_URL : `${ENV_URL}/api`
 
 export default function LocationPage() {
-  const { user } = useAuth()
-  const { pets } = usePets()
-  const [selectedPet, setSelectedPet] = useState('')
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null)
-  const [locationHistory, setLocationHistory] = useState<Array<{
-    id: string
-    petId: string
-    lat: number
-    lng: number
-    timestamp: string
-    address?: string
-  }>>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [locations, setLocations] = useState<PetLocationData[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [selectedPetId, setSelectedPetId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const isLocked = user?.plan === 'FREE'
-
-  useEffect(() => {
-    if (!isLocked && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          })
-        },
-        (error) => {
-          console.error('Error getting location:', error)
-        }
-      )
-    }
-  }, [isLocked])
-
-  const trackLocation = async () => {
-    if (!selectedPet || isLocked) return
-    
-    setIsLoading(true)
+  const fetchLocations = async () => {
     try {
-      if (navigator.geolocation) {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject)
-        })
-        
-        const newLocation = {
-          id: Date.now().toString(),
-          petId: selectedPet,
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          timestamp: new Date().toISOString(),
-          address: 'Ubicación actual'
-        }
-        
-        setLocationHistory(prev => [newLocation, ...prev])
-        setCurrentLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        })
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setError('No has iniciado sesión. Por favor ingresa a tu cuenta.')
+        setIsLoading(false)
+        return
       }
-    } catch (error) {
-      console.error('Error tracking location:', error)
+
+      const res = await fetch(`${API_URL}/location/latest`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      if (!res.ok) {
+        if (res.status === 401) setError('Sesión expirada. Por favor recarga o inicia sesión nuevamente.')
+        else if (res.status === 404) setError(`Ruta no encontrada (${API_URL}/location/latest). Intenta reiniciar el Backend.`)
+        else setError(`Error del servidor: ${res.status}`)
+        return
+      }
+
+      const json = await res.json()
+      if (json.success) {
+        // Normalizar URLs de fotos
+        const processedData = json.data.map((item: any) => ({
+          ...item,
+          pet: {
+            ...item.pet,
+            photoUrl: item.pet.photoUrl
+              ? (item.pet.photoUrl.startsWith('http') ? item.pet.photoUrl : `${ENV_URL}${item.pet.photoUrl}`)
+              : null
+          }
+        }))
+        setLocations(processedData)
+        setLastUpdated(new Date())
+        setError(null)
+      } else {
+        setError(json.message || 'Error al obtener datos')
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Error de conexión con el servidor backend (revisa que esté corriendo)')
     } finally {
       setIsLoading(false)
     }
   }
 
-  if (isLocked) {
-    return (
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-200">
-          <div className="text-center">
-            <Crown className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-stone-900 mb-2">Seguimiento GPS</h1>
-            <p className="text-stone-600 mb-6">
-              Monitorea la ubicación de tus mascotas en tiempo real
-            </p>
-            <div className="bg-white rounded-xl p-6 mb-6">
-              <h3 className="font-semibold text-stone-900 mb-3">Características Premium:</h3>
-              <ul className="space-y-2 text-stone-600">
-                <li className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-amber-500" />
-                  Seguimiento en tiempo real
-                </li>
-                <li className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-500" />
-                  Historial de ubicaciones
-                </li>
-                <li className="flex items-center gap-2">
-                  <Navigation className="w-4 h-4 text-amber-500" />
-                  Geocercas y alertas
-                </li>
-              </ul>
-            </div>
-            <a href="/pricing?upgrade=gps" className="btn-primary">
-              Actualizar Plan
-            </a>
-          </div>
-        </div>
-      </div>
-    )
+  useEffect(() => {
+    fetchLocations()
+    const interval = setInterval(fetchLocations, 10000) // Cada 10s
+    return () => clearInterval(interval)
+  }, [])
+
+  const activePets = locations.filter(l => l.location)
+  const selectedPetData = selectedPetId
+    ? locations.find(l => l.pet.id === selectedPetId)
+    : (activePets.length > 0 ? activePets[0] : null)
+
+  const handleRefresh = () => {
+    setIsLoading(true)
+    fetchLocations()
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-7xl mx-auto p-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-sage-900">Seguimiento GPS</h1>
-          <p className="text-stone-600">Monitorea la ubicación de tus mascotas</p>
+          <h1 className="text-3xl font-bold text-gray-900">Rastreo GPS en vivo</h1>
+          <p className="text-gray-500 mt-1">Monitorea la ubicación de todas tus mascotas en tiempo real</p>
+        </div>
+        <div className="flex items-center gap-4">
+          {lastUpdated && (
+            <span className="text-sm text-gray-400">
+              Actualizado: {lastUpdated.toLocaleTimeString()}
+            </span>
+          )}
+          <button
+            onClick={handleRefresh}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Actualizar ahora"
+          >
+            <RefreshCw className={`w-5 h-5 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Map View */}
-        <div className="bg-white rounded-2xl p-6 border border-sage-200">
-          <h2 className="text-lg font-semibold text-sage-900 mb-4">Mapa en vivo</h2>
-          <div className="bg-sage-50 rounded-xl h-96 flex items-center justify-center border-2 border-dashed border-sage-300">
-            {currentLocation ? (
-              <div className="text-center">
-                <MapPin className="w-12 h-12 text-sage-600 mx-auto mb-3" />
-                <p className="text-stone-700 mb-1">Ubicación actual</p>
-                <p className="text-sm text-stone-500">
-                  {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}
-                </p>
-              </div>
-            ) : (
-              <div className="text-center">
-                <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-3" />
-                <p className="text-stone-500">Ubicación no disponible</p>
-                <p className="text-sm text-stone-400">Activa el GPS del navegador</p>
-              </div>
-            )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Panel Izquierdo: Lista de Mascotas */}
+        <div className="space-y-4 lg:col-span-1">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Tus Mascotas</h2>
+            <div className="space-y-3">
+              {locations.length === 0 && !isLoading && !error && (
+                <div className="text-center py-8 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                  <p className="font-medium">No se encontraron mascotas</p>
+                  <p className="text-xs mt-2 px-4">Asegúrate de usar la misma cuenta (email) en la Web y en la App Móvil.</p>
+                </div>
+              )}
+
+              {locations.map((item) => (
+                <div
+                  key={item.pet.id}
+                  onClick={() => setSelectedPetId(item.pet.id)}
+                  className={`flex items-center p-3 rounded-xl cursor-pointer transition-all ${selectedPetId === item.pet.id || (!selectedPetId && item === selectedPetData)
+                    ? 'bg-blue-50 border-blue-200 shadow-sm ring-1 ring-blue-200'
+                    : 'hover:bg-gray-50 border border-transparent'
+                    }`}
+                >
+                  <img
+                    src={item.pet.photoUrl || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=100&h=100&fit=crop'}
+                    alt={item.pet.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                  />
+                  <div className="ml-3 flex-1">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-bold text-gray-800">{item.pet.name}</h3>
+                      {item.location && item.location.battery && (
+                        <div className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${item.location.battery > 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                          <Battery className="w-3 h-3" />
+                          {item.location.battery}%
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center mt-1">
+                      {item.location ? (
+                        <>
+                          <div className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
+                          <span className="text-xs text-gray-500">
+                            Hace {Math.floor((Date.now() - new Date(item.location.timestamp).getTime()) / 60000)} min
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-2 h-2 rounded-full bg-gray-300 mr-2" />
+                          <span className="text-xs text-gray-400">Sin señal</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Estadísticas Rápidas */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+              <p className="text-xs text-gray-500 uppercase font-semibold">En línea</p>
+              <p className="text-2xl font-bold text-green-600">{activePets.length}</p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+              <p className="text-xs text-gray-500 uppercase font-semibold">Total</p>
+              <p className="text-2xl font-bold text-gray-800">{locations.length}</p>
+            </div>
           </div>
         </div>
 
-        {/* Control Panel */}
-        <div className="space-y-6">
-          {/* Pet Selection */}
-          <div className="bg-white rounded-2xl p-6 border border-sage-200">
-            <h2 className="text-lg font-semibold text-sage-900 mb-4">Seleccionar Mascota</h2>
-            <select
-              value={selectedPet}
-              onChange={(e) => setSelectedPet(e.target.value)}
-              className="w-full"
-            >
-              <option value="">Elegir mascota...</option>
-              {pets?.map(pet => (
-                <option key={pet.id} value={pet.id}>{pet.name}</option>
-              ))}
-            </select>
-            <button
-              onClick={trackLocation}
-              disabled={!selectedPet || isLoading}
-              className="w-full btn-primary flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Navigation className="w-4 h-4" />
-                  Actualizar Ubicación
-                </>
-              )}
-            </button>
-          </div>
+        {/* Panel Derecho: Mapa */}
+        <div className="lg:col-span-2 h-[600px] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative">
+          <PetMap
+            petsWrapper={locations}
+            center={selectedPetData?.location ? [selectedPetData.location.latitude, selectedPetData.location.longitude] : [-17.7833, -63.1821]}
+            zoom={selectedPetData ? 15 : 12}
+          />
 
-          {/* Quick Stats */}
-          <div className="bg-white rounded-2xl p-6 border border-sage-200">
-            <h2 className="text-lg font-semibold text-sage-900 mb-4">Resumen</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-sage-50 rounded-xl p-4">
-                <p className="text-sm text-stone-600">Mascotas activas</p>
-                <p className="text-2xl font-bold text-sage-900">{selectedPet ? '1' : '0'}</p>
-              </div>
-              <div className="bg-sage-50 rounded-xl p-4">
-                <p className="text-sm text-stone-600">Registros hoy</p>
-                <p className="text-2xl font-bold text-sage-900">
-                  {locationHistory.filter(loc => {
-                    const today = new Date().toDateString()
-                    return new Date(loc.timestamp).toDateString() === today
-                  }).length}
-                </p>
-              </div>
+          {/* Badge flotante */}
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg z-[1000] border border-gray-200">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              <span className="text-sm font-bold text-gray-700">Live GPS</span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Location History */}
-      {locationHistory.length > 0 && (
-        <div className="bg-white rounded-2xl p-6 border border-sage-200 mt-6">
-          <h2 className="text-lg font-semibold text-sage-900 mb-4">Historial de ubicaciones</h2>
-          <div className="space-y-3">
-            {locationHistory.map(location => {
-              const pet = pets?.find(p => p.id === location.petId)
-              return (
-                <div key={location.id} className="flex items-center justify-between p-4 bg-stone-50 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-5 h-5 text-sage-600" />
-                    <div>
-                      <p className="font-medium text-stone-900">{pet?.name || 'Mascota'}</p>
-                      <p className="text-sm text-stone-500">{location.address}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-stone-600">
-                      {new Date(location.timestamp).toLocaleTimeString()}
-                    </p>
-                    <p className="text-xs text-stone-400">
-                      {new Date(location.timestamp).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

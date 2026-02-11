@@ -191,10 +191,10 @@ export const PetTrackingScreen = () => {
         );
     }
 
-    // Coordenadas iniciales (fallback a Santa Cruz, Bolivia si no hay datos)
+    // Coordenadas iniciales (fallback a Oruro, Bolivia si no hay datos)
     const initialRegion = {
-        latitude: currentLocation?.latitude || -17.7833,
-        longitude: currentLocation?.longitude || -63.1821,
+        latitude: currentLocation?.latitude || -17.9647,
+        longitude: currentLocation?.longitude || -67.1060,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
     };

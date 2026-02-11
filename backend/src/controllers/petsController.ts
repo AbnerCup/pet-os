@@ -7,8 +7,16 @@ export const getPets = async (req: AuthRequest, res: Response) => {
     where: { userId: req.user!.id },
     include: {
       expenses: { select: { amount: true } },
-      healthRecords: { select: { status: true } },
-      activities: { select: { id: true } }
+      healthRecords: {
+        select: { id: true, type: true, status: true, date: true, nextDate: true, notes: true },
+        orderBy: { date: 'desc' },
+        take: 5
+      },
+      activities: {
+        select: { id: true, type: true, date: true, duration: true },
+        orderBy: { date: 'desc' },
+        take: 5
+      }
     },
     orderBy: { createdAt: 'desc' }
   })

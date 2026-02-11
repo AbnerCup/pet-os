@@ -15,6 +15,7 @@ export const useAuth = () => {
     error,
     login,
     logout,
+    checkAuth,
     clearError,
   };
 };

@@ -212,7 +212,7 @@ export default function LocationPage() {
         <div className="lg:col-span-2 h-[600px] bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden relative">
           <PetMap
             petsWrapper={locations}
-            center={selectedPetData?.location ? [selectedPetData.location.latitude, selectedPetData.location.longitude] : [-17.7833, -63.1821]}
+            center={selectedPetData?.location ? [selectedPetData.location.latitude, selectedPetData.location.longitude] : [-17.9647, -67.1060]}
             zoom={selectedPetData ? 15 : 12}
           />
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePets } from '../../hooks/usePets';
 import { useAuth } from '../../hooks/useAuth';
+import { useAllLocations } from '../../hooks/useLocation';
 import { Pet } from '../../types';
 import { MainTabScreenProps, RootStackParamList } from '../../navigation/types';
 import { getPetImage, calculateAge } from '../../utils/helpers';
@@ -77,11 +78,11 @@ export const DashboardScreen: React.FC<Props> = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const { data: pets, isLoading, refetch } = usePets();
+  const { data: locations } = useAllLocations();
 
-  const stats = React.useMemo(() => {
-    // Si no hay mascotas o no es un array, devolvemos stats en cero
+  const stats = useMemo(() => {
     if (!pets || !Array.isArray(pets)) {
-      return { totalPets: 0, expenses: '€0', pending: 0, appointments: 0 };
+      return { totalPets: 0, expenses: '€0', pending: 0, activities: 0 };
     }
 
     const totalExpenses = pets.reduce((sum, pet) => {
@@ -92,7 +93,7 @@ export const DashboardScreen: React.FC<Props> = () => {
 
     const pendingHealth = pets.reduce((count, pet) => {
       const records = Array.isArray(pet.healthRecords) ? pet.healthRecords : [];
-      return count + (records.filter(h => h.status === 'pending').length || 0);
+      return count + (records.filter((h: any) => h.status === 'pending').length || 0);
     }, 0);
 
     const totalActivities = pets.reduce((sum, pet) => {
@@ -107,6 +108,54 @@ export const DashboardScreen: React.FC<Props> = () => {
     };
   }, [pets]);
 
+  // Generar Alertas Reales
+  const alerts = useMemo(() => {
+    const list: any[] = [];
+
+    // 1. Batería Baja (Urgente)
+    if (locations && Array.isArray(locations)) {
+      locations.forEach((item: any) => {
+        if (item.location && item.location.battery !== undefined && item.location.battery < 20) {
+          list.push({
+            id: `batt-${item.pet.id}`,
+            title: 'Batería Crítica',
+            message: `${item.pet.name} tiene ${item.location.battery}% de batería`,
+            time: 'Ahora',
+            icon: 'battery-dead',
+            color: '#e74c3c'
+          });
+        }
+      });
+    }
+
+    // 2. Salud / Vacunas proximas
+    if (pets && Array.isArray(pets)) {
+      pets.forEach((pet: any) => {
+        if (pet.healthRecords && Array.isArray(pet.healthRecords)) {
+          pet.healthRecords.forEach((record: any) => {
+            if (record.status === 'pending') {
+              const date = record.nextDate ? new Date(record.nextDate) : new Date(record.date);
+              const now = new Date();
+              // Mostrar si es hoy o futuro cercano (o pasado vencido)
+              list.push({
+                id: `health-${record.id}`,
+                title: record.type === 'vaccine' ? 'Vacuna Pendiente' : 'Cita Médica',
+                message: `${pet.name}: ${record.notes || 'Revisión programada'}`,
+                time: date.toLocaleDateString(),
+                icon: 'medical',
+                color: date < now ? '#e74c3c' : '#f5a623'
+              });
+            }
+          });
+        }
+      });
+    }
+
+    // Ordenar por urgencia/fecha? Si, pero simple por ahora. Batería primero.
+    // Limitar a 5
+    return list.slice(0, 5);
+  }, [pets, locations]);
+
   const renderHeader = () => (
     <>
       <View style={styles.header}>
@@ -119,9 +168,11 @@ export const DashboardScreen: React.FC<Props> = () => {
           onPress={() => navigation.navigate('Notifications')}
         >
           <Ionicons name="notifications-outline" size={24} color="#333" />
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>2</Text>
-          </View>
+          {alerts.length > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>{alerts.length}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -172,27 +223,23 @@ export const DashboardScreen: React.FC<Props> = () => {
       </View>
 
       <View style={styles.alertsContainer}>
-        <AlertItem
-          icon="medical"
-          color="#e74c3c"
-          title="Vacuna pendiente"
-          message="Luna necesita su vacuna anual"
-          time="Hace 2 horas"
-        />
-        <AlertItem
-          icon="calendar"
-          color="#4a90e2"
-          title="Cita veterinaria"
-          message="Chequeo mensual de Max"
-          time="Mañana, 10:00 AM"
-        />
-        <AlertItem
-          icon="medical"
-          color="#f5a623"
-          title="Medicación"
-          message="Recordatorio: Pastilla diaria"
-          time="Hoy, 8:00 PM"
-        />
+        {alerts.length === 0 ? (
+          <View style={{ alignItems: 'center', padding: 20 }}>
+            <Ionicons name="checkmark-done-circle-outline" size={48} color="#ccc" />
+            <Text style={{ color: '#999', marginTop: 8 }}>Todo está tranquilo</Text>
+          </View>
+        ) : (
+          alerts.map((alert, index) => (
+            <AlertItem
+              key={index}
+              icon={alert.icon as any}
+              color={alert.color}
+              title={alert.title}
+              message={alert.message}
+              time={alert.time}
+            />
+          ))
+        )}
       </View>
     </>
   );
@@ -247,6 +294,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#fff',
+    marginTop: 30, // SafeArea
   },
   greeting: {
     fontSize: 14,
@@ -288,7 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 10,
     width: '47%',
     borderLeftWidth: 4,
     shadowColor: '#000',
@@ -296,20 +344,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    minHeight: 80,
   },
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 10,
   },
   statInfo: {
     flex: 1,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -408,6 +457,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+    marginBottom: 40,
   },
   alertItem: {
     flexDirection: 'row',

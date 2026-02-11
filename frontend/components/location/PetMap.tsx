@@ -87,7 +87,7 @@ export default function PetMap({ petsWrapper, center, zoom = 13 }: PetMapProps) 
         ? center
         : (activePets.length > 0
             ? [activePets[0].location!.latitude, activePets[0].location!.longitude]
-            : [-17.7833, -63.1821]);
+            : [-17.9647, -67.1060]);
 
     return (
         <MapContainer

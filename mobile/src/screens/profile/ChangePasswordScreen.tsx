@@ -2,32 +2,41 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackScreenProps } from '../../navigation/types';
-import { useAuth } from '../../hooks/useAuth';
 import { userApi } from '../../api/endpoints';
 
-export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = ({ navigation }) => {
-    const { user, checkAuth } = useAuth();
-    const [name, setName] = useState(user?.name || '');
-    const [email, setEmail] = useState(user?.email || '');
-    const [phone, setPhone] = useState(user?.phone || '');
+export const ChangePasswordScreen: React.FC<RootStackScreenProps<'ChangePassword'>> = ({ navigation }) => {
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
     const [isSaving, setIsSaving] = useState(false);
 
     const handleSave = async () => {
-        if (!name.trim()) {
-            Alert.alert('Error', 'El nombre no puede estar vacío');
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            Alert.alert('Error', 'Por favor, completa todos los campos');
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            Alert.alert('Error', 'La nueva contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            Alert.alert('Error', 'Las contraseñas no coinciden');
             return;
         }
 
         setIsSaving(true);
         try {
-            await userApi.updateProfile({ name, phone, email });
-            await checkAuth(); // Actualizar el estado local
-            Alert.alert('Éxito', 'Perfil actualizado correctamente', [
+            await userApi.changePassword(currentPassword, newPassword);
+            Alert.alert('Éxito', 'Contraseña actualizada correctamente', [
                 { text: 'OK', onPress: () => navigation.goBack() }
             ]);
         } catch (error: any) {
-            console.error('Update profile error:', error.response?.data || error.message);
-            Alert.alert('Error', 'No se pudo actualizar el perfil. Intenta de nuevo.');
+            console.error('Change password error:', error.response?.data || error.message);
+            const errorMessage = error.response?.data?.error || 'No se pudo cambiar la contraseña. Verifica tu contraseña actual.';
+            Alert.alert('Error', errorMessage);
         } finally {
             setIsSaving(false);
         }
@@ -37,56 +46,51 @@ export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = 
         <SafeAreaView style={styles.safeArea}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="close" size={28} color="#333" />
+                    <Ionicons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Editar Perfil</Text>
-                <TouchableOpacity onPress={handleSave}>
-                    <Text style={styles.saveText}>Guardar</Text>
-                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Cambiar Contraseña</Text>
+                <View style={{ width: 40 }} />
             </View>
 
             <ScrollView style={styles.container}>
-                <View style={styles.avatarSection}>
-                    <View style={styles.avatar}>
-                        <Ionicons name="person" size={50} color="#7c9a6b" />
-                        <TouchableOpacity style={styles.changeAvatarButton}>
-                            <Ionicons name="camera" size={20} color="#fff" />
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={styles.changePhotoText}>Cambiar foto de perfil</Text>
+                <View style={styles.infoBox}>
+                    <Ionicons name="information-circle-outline" size={20} color="#7c9a6b" />
+                    <Text style={styles.infoText}>
+                        Tu contraseña debe tener al menos 8 caracteres e incluir letras y números.
+                    </Text>
                 </View>
 
                 <View style={styles.form}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Nombre completo</Text>
+                        <Text style={styles.label}>Contraseña actual</Text>
                         <TextInput
                             style={styles.input}
-                            value={name}
-                            onChangeText={setName}
-                            placeholder="Tu nombre"
+                            value={currentPassword}
+                            onChangeText={setCurrentPassword}
+                            placeholder="••••••••"
+                            secureTextEntry
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Correo electrónico</Text>
+                        <Text style={styles.label}>Nueva contraseña</Text>
                         <TextInput
                             style={styles.input}
-                            value={email}
-                            onChangeText={setEmail}
-                            placeholder="tu@email.com"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
+                            value={newPassword}
+                            onChangeText={setNewPassword}
+                            placeholder="••••••••"
+                            secureTextEntry
                         />
                     </View>
 
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Teléfono</Text>
+                        <Text style={styles.label}>Confirmar nueva contraseña</Text>
                         <TextInput
                             style={styles.input}
-                            value={phone}
-                            onChangeText={setPhone}
-                            placeholder="+1 234 567 890"
-                            keyboardType="phone-pad"
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            placeholder="••••••••"
+                            secureTextEntry
                         />
                     </View>
                 </View>
@@ -97,7 +101,7 @@ export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = 
                     disabled={isSaving}
                 >
                     <Text style={styles.updateButtonText}>
-                        {isSaving ? 'Guardando...' : 'Actualizar Perfil'}
+                        {isSaving ? 'Cambiando...' : 'Cambiar Contraseña'}
                     </Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -127,45 +131,22 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: '#333',
     },
-    saveText: {
-        fontSize: 16,
-        color: '#7c9a6b',
-        fontWeight: '600',
-    },
     container: {
         flex: 1,
     },
-    avatarSection: {
-        alignItems: 'center',
-        marginVertical: 30,
-    },
-    avatar: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+    infoBox: {
+        flexDirection: 'row',
         backgroundColor: '#e8f0e4',
-        justifyContent: 'center',
+        margin: 20,
+        padding: 16,
+        borderRadius: 12,
         alignItems: 'center',
-        position: 'relative',
     },
-    changeAvatarButton: {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        backgroundColor: '#7c9a6b',
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#fff',
-    },
-    changePhotoText: {
-        marginTop: 12,
-        color: '#7c9a6b',
+    infoText: {
+        flex: 1,
+        color: '#4e6144',
         fontSize: 14,
-        fontWeight: '600',
+        marginLeft: 12,
     },
     form: {
         paddingHorizontal: 20,
@@ -196,11 +177,6 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
-        shadowColor: '#7c9a6b',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 4,
     },
     updateButtonText: {
         color: '#fff',

@@ -95,13 +95,13 @@ export const dashboardApi = {
 };
 
 export const userApi = {
-  getProfile: () => api.get<User>('/users/profile'),
+  getProfile: () => api.get<ApiResponse<User>>('/auth/me'),
 
   updateProfile: (data: Partial<User>) =>
-    api.put<User>('/users/profile', data),
+    api.put<ApiResponse<User>>('/auth/me', data),
 
   changePassword: (oldPassword: string, newPassword: string) =>
-    api.post('/users/change-password', { oldPassword, newPassword }),
+    api.post<ApiResponse<void>>('/auth/change-password', { oldPassword, newPassword }),
 };
 
 export const uploadApi = {

@@ -15,6 +15,7 @@ import { EditPetScreen } from '../screens/pets/EditPetScreen';
 import { AddHealthRecordScreen } from '../screens/health/AddHealthRecordScreen';
 import { SettingsScreen } from '../screens/profile/SettingsScreen';
 import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
+import { ChangePasswordScreen } from '../screens/profile/ChangePasswordScreen';
 import { NotificationsScreen } from '../screens/notifications/NotificationsScreen';
 import { ExpensesScreen } from '../screens/expenses/ExpensesScreen';
 import { AddExpenseScreen } from '../screens/expenses/AddExpenseScreen';
@@ -90,6 +91,11 @@ export const RootNavigator: React.FC = () => {
                 name="EditProfile"
                 component={EditProfileScreen}
                 options={{ title: 'Editar Perfil' }}
+              />
+              <Stack.Screen
+                name="ChangePassword"
+                component={ChangePasswordScreen}
+                options={{ title: 'Cambiar Contraseña' }}
               />
               <Stack.Screen
                 name="Notifications"

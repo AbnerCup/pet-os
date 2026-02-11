@@ -216,8 +216,8 @@ export const LocationScreen = () => {
                     provider={PROVIDER_DEFAULT}
                     style={styles.map}
                     initialRegion={{
-                        latitude: -17.7833,
-                        longitude: -63.1821,
+                        latitude: -17.9647,
+                        longitude: -67.1060,
                         latitudeDelta: 0.05,
                         longitudeDelta: 0.05,
                     }}

@@ -1,11 +1,13 @@
 import { Router } from 'express'
 import * as authController from '../controllers/authController'
 import { validate } from '../middleware/validation'
-import { registerSchema, loginSchema, updateProfileSchema } from '../validators/auth'
+import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } from '../validators/auth'
 import { authenticateToken } from '../middleware/auth'
 import { authLimiter } from '../middleware/rateLimiter'
 
 const router = Router()
+
+router.post('/change-password', authenticateToken, validate(changePasswordSchema), authController.changePassword)
 
 // POST /api/auth/register
 /**

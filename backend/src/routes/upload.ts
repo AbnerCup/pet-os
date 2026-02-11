@@ -53,7 +53,9 @@ router.post('/', upload.single('file'), (req, res) => {
         res.json({
             success: true,
             message: 'Imagen subida exitosamente',
-            imageUrl: imageUrl
+            data: {
+                imageUrl: imageUrl
+            }
         })
     } catch (error) {
         res.status(500).json({

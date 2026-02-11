@@ -57,6 +57,15 @@ export const errorHandler = (
     })
   }
 
+  // Errores de Multer
+  if (err.message === 'Unexpected field') {
+    return res.status(400).json({
+      success: false,
+      error: 'Campo de archivo inválido',
+      details: 'El servidor esperaba un campo llamado "file"'
+    })
+  }
+
   // Error genérico
   res.status(500).json({
     success: false,

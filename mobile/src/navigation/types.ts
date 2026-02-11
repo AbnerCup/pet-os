@@ -8,7 +8,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: NavigatorScreenParams<MainTabParamList>;
   PetDetail: { petId: string };
-  HealthHub: { petId: string; petName: string };
+  HealthHub: { petId?: string; petName?: string };
   AddPet: undefined;
   EditPet: { petId: string };
   AddHealthRecord: { petId: string };
@@ -16,6 +16,12 @@ export type RootStackParamList = {
   EditProfile: undefined;
   ChangePassword: undefined;
   Notifications: undefined;
+  Expenses: { petId?: string };
+  AddExpense: { petId?: string };
+  Activities: { petId?: string };
+  AddActivity: { petId?: string };
+  Agenda: { petId: string; petName: string };
+  PetTracking: { petId: string };
 };
 
 // Main Tab Param List
@@ -56,7 +62,7 @@ export type PetsStackParamList = {
 };
 
 export type HealthStackParamList = {
-  HealthHub: { petId: string; petName: string };
+  HealthHub: { petId?: string; petName?: string };
   HealthRecordDetail: { recordId: string };
   AddHealthRecord: { petId: string };
 };

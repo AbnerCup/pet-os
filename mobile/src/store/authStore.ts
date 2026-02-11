@@ -31,10 +31,15 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authApi.login(email, password);
-          const { user, token, refreshToken } = response.data;
+          // El backend devuelve { success: true, data: { user, token } }
+          const { user, token, refreshToken } = response.data.data;
 
-          await SecureStore.setItemAsync('auth_token', token);
-          await SecureStore.setItemAsync('refresh_token', refreshToken);
+          if (token) {
+            await SecureStore.setItemAsync('auth_token', token);
+          }
+          if (refreshToken) {
+            await SecureStore.setItemAsync('refresh_token', refreshToken);
+          }
 
           set({
             user,
@@ -43,8 +48,9 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (error: any) {
+          console.error('Login error details:', error.response?.data);
           set({
-            error: error.response?.data?.message || 'Error al iniciar sesión',
+            error: error.response?.data?.error || error.response?.data?.message || 'Error al iniciar sesión',
             isLoading: false,
           });
           throw error;
@@ -71,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
 
           const response = await authApi.me();
           set({
-            user: response.data,
+            user: response.data.data,
             token,
             isAuthenticated: true,
           });

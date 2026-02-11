@@ -16,6 +16,12 @@ import { AddHealthRecordScreen } from '../screens/health/AddHealthRecordScreen';
 import { SettingsScreen } from '../screens/profile/SettingsScreen';
 import { EditProfileScreen } from '../screens/profile/EditProfileScreen';
 import { NotificationsScreen } from '../screens/notifications/NotificationsScreen';
+import { ExpensesScreen } from '../screens/expenses/ExpensesScreen';
+import { AddExpenseScreen } from '../screens/expenses/AddExpenseScreen';
+import { ActivitiesScreen } from '../screens/activities/ActivitiesScreen';
+import { AddActivityScreen } from '../screens/activities/AddActivityScreen';
+import { AgendaScreen } from '../screens/pets/AgendaScreen';
+import { PetTrackingScreen } from '../screens/location/PetTrackingScreen';
 
 import { RootStackParamList } from './types';
 
@@ -89,6 +95,36 @@ export const RootNavigator: React.FC = () => {
                 name="Notifications"
                 component={NotificationsScreen}
                 options={{ title: 'Notificaciones' }}
+              />
+              <Stack.Screen
+                name="Expenses"
+                component={ExpensesScreen}
+                options={{ title: 'Gastos' }}
+              />
+              <Stack.Screen
+                name="AddExpense"
+                component={AddExpenseScreen}
+                options={{ title: 'Nuevo Gasto' }}
+              />
+              <Stack.Screen
+                name="Activities"
+                component={ActivitiesScreen}
+                options={{ title: 'Actividades' }}
+              />
+              <Stack.Screen
+                name="AddActivity"
+                component={AddActivityScreen}
+                options={{ title: 'Nueva Actividad' }}
+              />
+              <Stack.Screen
+                name="Agenda"
+                component={AgendaScreen}
+                options={{ title: 'Agenda' }}
+              />
+              <Stack.Screen
+                name="PetTracking"
+                component={PetTrackingScreen}
+                options={{ title: 'Seguimiento GPS' }}
               />
             </Stack.Group>
           </>

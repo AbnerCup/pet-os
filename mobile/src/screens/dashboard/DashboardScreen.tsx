@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { usePets } from '../../hooks/usePets';
 import { useAuth } from '../../hooks/useAuth';
 import { Pet } from '../../types';
-import { MainTabScreenProps } from '../../navigation/types';
+import { MainTabScreenProps, RootStackParamList } from '../../navigation/types';
+import { getPetImage, calculateAge } from '../../utils/helpers';
 
 type Props = MainTabScreenProps<'Dashboard'>;
 
@@ -36,16 +38,21 @@ const StatCard: React.FC<{
   </TouchableOpacity>
 );
 
-const PetCard: React.FC<{ pet: Pet; onPress: () => void }> = ({ pet, onPress }) => (
-  <TouchableOpacity style={styles.petCard} onPress={onPress}>
-    <Image
-      source={{ uri: pet.photoUrl || 'https://via.placeholder.com/100' }}
-      style={styles.petImage}
-    />
-    <Text style={styles.petName} numberOfLines={1}>{pet.name}</Text>
-    <Text style={styles.petBreed} numberOfLines={1}>{pet.species}</Text>
-  </TouchableOpacity>
-);
+const PetCard: React.FC<{ pet: Pet; onPress: () => void }> = ({ pet, onPress }) => {
+  const age = pet.birthDate ? calculateAge(pet.birthDate) : '-';
+
+  return (
+    <TouchableOpacity style={styles.petCard} onPress={onPress}>
+      <Image
+        source={{ uri: getPetImage(pet.photoUrl, pet.species) }}
+        style={styles.petImage}
+      />
+      <Text style={styles.petName} numberOfLines={1}>{pet.name}</Text>
+      <Text style={styles.petBreed} numberOfLines={1}>{pet.breed || pet.species}</Text>
+      <Text style={styles.petAge}>{age} años</Text>
+    </TouchableOpacity>
+  );
+};
 
 const AlertItem: React.FC<{
   icon: keyof typeof Ionicons.glyphMap;
@@ -67,16 +74,38 @@ const AlertItem: React.FC<{
 );
 
 export const DashboardScreen: React.FC<Props> = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { user } = useAuth();
   const { data: pets, isLoading, refetch } = usePets();
 
-  const stats = {
-    totalPets: pets?.length || 0,
-    expenses: '$0',
-    pending: 0,
-    appointments: 0,
-  };
+  const stats = React.useMemo(() => {
+    // Si no hay mascotas o no es un array, devolvemos stats en cero
+    if (!pets || !Array.isArray(pets)) {
+      return { totalPets: 0, expenses: '€0', pending: 0, appointments: 0 };
+    }
+
+    const totalExpenses = pets.reduce((sum, pet) => {
+      const petExpensesArray = Array.isArray(pet.expenses) ? pet.expenses : [];
+      const petTotal = petExpensesArray.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+      return sum + petTotal;
+    }, 0);
+
+    const pendingHealth = pets.reduce((count, pet) => {
+      const records = Array.isArray(pet.healthRecords) ? pet.healthRecords : [];
+      return count + (records.filter(h => h.status === 'pending').length || 0);
+    }, 0);
+
+    const totalActivities = pets.reduce((sum, pet) => {
+      return sum + (Array.isArray(pet.activities) ? pet.activities.length : 0);
+    }, 0);
+
+    return {
+      totalPets: pets.length,
+      expenses: `€${totalExpenses.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`,
+      pending: pendingHealth,
+      activities: totalActivities,
+    };
+  }, [pets]);
 
   const renderHeader = () => (
     <>
@@ -85,7 +114,7 @@ export const DashboardScreen: React.FC<Props> = () => {
           <Text style={styles.greeting}>¡Hola!</Text>
           <Text style={styles.userName}>{user?.name || 'Usuario'}</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.notificationButton}
           onPress={() => navigation.navigate('Notifications')}
         >
@@ -102,31 +131,34 @@ export const DashboardScreen: React.FC<Props> = () => {
           value={stats.totalPets}
           icon="paw"
           color="#7c9a6b"
-          onPress={() => navigation.navigate('Pets')}
+          onPress={() => navigation.navigate('Main', { screen: 'Pets' })}
         />
         <StatCard
           title="Gastos"
           value={stats.expenses}
           icon="wallet"
           color="#4a90e2"
+          onPress={() => navigation.navigate('Expenses', {})}
         />
         <StatCard
           title="Pendientes"
           value={stats.pending}
           icon="time"
           color="#f5a623"
+          onPress={() => navigation.navigate('HealthHub', {})}
         />
         <StatCard
-          title="Citas"
-          value={stats.appointments}
-          icon="calendar"
-          color="#e74c3c"
+          title="Actividades"
+          value={stats.activities || 0}
+          icon="fitness"
+          color="#34c759"
+          onPress={() => navigation.navigate('Activities', {})}
         />
       </View>
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Mis Mascotas</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Pets')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Main', { screen: 'Pets' })}>
           <Text style={styles.seeAll}>Ver todas</Text>
         </TouchableOpacity>
       </View>
@@ -155,7 +187,7 @@ export const DashboardScreen: React.FC<Props> = () => {
           time="Mañana, 10:00 AM"
         />
         <AlertItem
-          icon="medication"
+          icon="medical"
           color="#f5a623"
           title="Medicación"
           message="Recordatorio: Pastilla diaria"
@@ -175,7 +207,7 @@ export const DashboardScreen: React.FC<Props> = () => {
       {renderHeader()}
 
       <FlatList
-        data={pets?.slice(0, 5)}
+        data={Array.isArray(pets) ? pets.slice(0, 5) : []}
         renderItem={({ item }) => (
           <PetCard
             pet={item}
@@ -339,6 +371,13 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginTop: 2,
+  },
+  petAge: {
+    fontSize: 11,
+    color: '#7c9a6b',
+    textAlign: 'center',
+    marginTop: 2,
+    fontWeight: '500',
   },
   emptyPets: {
     padding: 40,

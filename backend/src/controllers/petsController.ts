@@ -5,6 +5,11 @@ import { AuthRequest } from '../types'
 export const getPets = async (req: AuthRequest, res: Response) => {
   const pets = await prisma.pet.findMany({
     where: { userId: req.user!.id },
+    include: {
+      expenses: { select: { amount: true } },
+      healthRecords: { select: { status: true } },
+      activities: { select: { id: true } }
+    },
     orderBy: { createdAt: 'desc' }
   })
 
@@ -45,6 +50,15 @@ export const createPet = async (req: AuthRequest, res: Response) => {
   // Validar límite según plan
   const petCount = await prisma.pet.count({ where: { userId: req.user!.id } })
   const maxPets = req.user!.plan === 'FREE' ? 1 : req.user!.plan === 'BASIC' ? 3 : 999
+
+  console.log('[BACKEND] CreatePet Check:', {
+    userId: req.user!.id,
+    userEmail: req.user!.email,
+    plan: req.user!.plan,
+    petCount,
+    maxPets,
+    canAdd: petCount < maxPets
+  })
 
   if (petCount >= maxPets) {
     return res.status(403).json({

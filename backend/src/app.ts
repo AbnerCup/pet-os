@@ -8,6 +8,8 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler'
 import { httpLogger } from './middleware/logging'
 import { morganStream } from './utils/logger'
 import { logInfo } from './utils/logger'
+import swaggerUi from 'swagger-ui-express'
+import { swaggerSpec } from './config/swagger'
 
 dotenv.config()
 
@@ -41,6 +43,9 @@ app.get('/api/health-check', (req, res) => {
     timestamp: new Date().toISOString()
   })
 })
+
+// Documentación Swagger
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Rutas de la aplicación
 app.use(routes)

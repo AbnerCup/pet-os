@@ -20,8 +20,10 @@ export const authenticateToken = async (
       throw error
     }
 
+    console.log('Verificando token:', token?.substring(0, 20) + '...')
     const decoded = jwt.verify(token, JWT_SECRET) as any
-    
+    console.log('Token decodificado correctamente para usuario:', decoded?.id)
+
     // Verificar que el usuario todavía existe y obtener plan actualizado
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },

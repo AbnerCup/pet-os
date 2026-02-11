@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { post } from '@/lib/api'
+import { post, fetcher } from '@/lib/api'
 
 interface User {
   id: string
@@ -27,16 +27,10 @@ export function useAuth() {
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/me', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      })
-      if (res.ok) {
-        const user = await res.json()
-        setUser(user)
-      } else {
-        logout()
-      }
-    } catch {
+      const response = await fetcher('/api/auth/me')
+      setUser(response.data)
+    } catch (error) {
+      console.error('Error fetching user:', error)
       logout()
     } finally {
       setLoading(false)
@@ -46,19 +40,21 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     try {
       console.log('Iniciando login con:', email)
-      const data = await post('/api/auth/login', { email, password })
-      console.log('Login exitoso:', data)
-      
-      localStorage.setItem('token', data.token)
+      const response = await post('/api/auth/login', { email, password })
+      console.log('Login exitoso:', response)
+
+      const { token, user } = response.data
+
+      localStorage.setItem('token', token)
       console.log('Token guardado')
-      
-      setUser(data.user)
-      console.log('Usuario establecido:', data.user)
-      
+
+      setUser(user)
+      console.log('Usuario establecido:', user)
+
       console.log('Redirigiendo a dashboard...')
       router.push('/dashboard')
-      
-      return data
+
+      return response
     } catch (error) {
       console.error('Error en login:', error)
       throw error

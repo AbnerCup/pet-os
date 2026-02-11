@@ -1,49 +1,55 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { locationApi } from '../api/endpoints';
-import { SafeZone } from '../types';
 
 export const useLocation = (petId: string) => {
   return useQuery({
     queryKey: ['location', petId],
     queryFn: async () => {
       const response = await locationApi.getCurrent(petId);
-      return response.data;
+      const locations = response.data?.data || response.data;
+      // Retorna el primer registro (más reciente) o null
+      if (Array.isArray(locations) && locations.length > 0) {
+        return locations[0];
+      }
+      return null;
     },
     enabled: !!petId,
     refetchInterval: 30000, // Refrescar cada 30 segundos
   });
 };
 
-export const useLocationHistory = (petId: string, startDate?: string, endDate?: string) => {
+export const useLocationHistory = (petId: string, limit?: number) => {
   return useQuery({
-    queryKey: ['location-history', petId, startDate, endDate],
+    queryKey: ['location-history', petId, limit],
     queryFn: async () => {
-      const response = await locationApi.getHistory(petId, startDate, endDate);
-      return response.data;
+      const response = await locationApi.getHistory(petId, limit);
+      return response.data?.data || response.data || [];
     },
     enabled: !!petId,
   });
 };
 
-export const useSafeZones = (petId: string) => {
+export const useAllLocations = () => {
   return useQuery({
-    queryKey: ['safe-zones', petId],
+    queryKey: ['all-locations'],
     queryFn: async () => {
-      const response = await locationApi.getSafeZones(petId);
-      return response.data;
+      const response = await locationApi.getAll(undefined, 50);
+      return response.data?.data || response.data || [];
     },
-    enabled: !!petId,
+    refetchInterval: 60000, // Cada minuto
   });
 };
 
-export const useCreateSafeZone = (petId: string) => {
+export const useCreateLocation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: Partial<SafeZone>) => 
-      locationApi.createSafeZone(petId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['safe-zones', petId] });
+    mutationFn: (data: { petId: string; latitude: number; longitude: number; accuracy?: number; battery?: number }) =>
+      locationApi.create(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['location', variables.petId] });
+      queryClient.invalidateQueries({ queryKey: ['location-history', variables.petId] });
+      queryClient.invalidateQueries({ queryKey: ['all-locations'] });
     },
   });
 };

@@ -124,7 +124,7 @@ export const RootNavigator: React.FC = () => {
               <Stack.Screen
                 name="PetTracking"
                 component={PetTrackingScreen}
-                options={{ title: 'Seguimiento GPS' }}
+                options={{ headerShown: false }}
               />
             </Stack.Group>
           </>

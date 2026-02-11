@@ -52,24 +52,24 @@ export const MainTabNavigator: React.FC = () => {
         },
       })}
     >
-      <Tab.Screen 
-        name="Dashboard" 
-        component={DashboardScreen} 
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
         options={{ title: 'Inicio' }}
       />
-      <Tab.Screen 
-        name="Pets" 
-        component={PetsListScreen} 
+      <Tab.Screen
+        name="Pets"
+        component={PetsListScreen}
         options={{ title: 'Mascotas' }}
       />
-      <Tab.Screen 
-        name="Location" 
-        component={LocationScreen} 
-        options={{ title: 'Ubicación' }}
+      <Tab.Screen
+        name="Location"
+        component={LocationScreen}
+        options={{ title: 'Ubicación', headerShown: false }}
       />
-      <Tab.Screen 
-        name="Profile" 
-        component={ProfileScreen} 
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
         options={{ title: 'Perfil' }}
       />
     </Tab.Navigator>

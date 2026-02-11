@@ -42,22 +42,21 @@ export const healthApi = {
 };
 
 export const locationApi = {
+  // GET /api/location?petId=xxx — obtiene historial (el más reciente es la "ubicación actual")
+  getAll: (petId?: string, limit?: number) =>
+    api.get<ApiResponse<any[]>>('/location', { params: { petId, limit } }),
+
+  // Obtener la ubicación más reciente de una mascota
   getCurrent: (petId: string) =>
-    api.get<Location>(`/pets/${petId}/location`),
+    api.get<ApiResponse<any[]>>('/location', { params: { petId, limit: 1 } }),
 
-  getHistory: (petId: string, startDate?: string, endDate?: string) =>
-    api.get<Location[]>(`/pets/${petId}/location/history`, {
-      params: { startDate, endDate },
-    }),
+  // POST /api/location — registrar nueva ubicación
+  create: (data: { petId: string; latitude: number; longitude: number; accuracy?: number; battery?: number }) =>
+    api.post<ApiResponse<Location>>('/location', data),
 
-  updateLocation: (petId: string, data: { latitude: number; longitude: number }) =>
-    api.post<Location>(`/pets/${petId}/location`, data),
-
-  getSafeZones: (petId: string) =>
-    api.get<SafeZone[]>(`/pets/${petId}/safe-zones`),
-
-  createSafeZone: (petId: string, data: Partial<SafeZone>) =>
-    api.post<SafeZone>(`/pets/${petId}/safe-zones`, data),
+  // Alias para compatibilidad
+  getHistory: (petId: string, limit?: number) =>
+    api.get<ApiResponse<any[]>>('/location', { params: { petId, limit: limit || 100 } }),
 };
 
 export const expensesApi = {

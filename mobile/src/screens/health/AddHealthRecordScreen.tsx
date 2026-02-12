@@ -87,7 +87,7 @@ export const AddHealthRecordScreen = () => {
                         onChangeText={(text) => setForm({ ...form, title: text })}
                         placeholder="Ej: Vacuna Triple Felina"
                     />
-                </div>
+                </View>
 
                 <View style={styles.section}>
                     <Text style={styles.label}>Tipo de Registro</Text>
@@ -109,7 +109,7 @@ export const AddHealthRecordScreen = () => {
                             </TouchableOpacity>
                         ))}
                     </View>
-                </div>
+                </View>
 
                 <View style={[styles.section, styles.row]}>
                     <View style={{ flex: 1, marginRight: 10 }}>
@@ -165,7 +165,7 @@ export const AddHealthRecordScreen = () => {
                         multiline
                         numberOfLines={4}
                     />
-                </div>
+                </View>
             </ScrollView>
         </View>
     );

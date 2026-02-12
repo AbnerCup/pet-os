@@ -8,6 +8,7 @@ import petsRoutes from './pets'
 import healthRoutes from './health'
 import expensesRoutes from './expenses'
 import locationRoutes from './location'
+import remindersRoutes from './reminders'
 
 import uploadRoutes from './upload'
 
@@ -22,6 +23,7 @@ router.use('/api/pets', petsRoutes)
 router.use('/api/health', healthRoutes)
 router.use('/api', expensesRoutes) // expenses/ y activities/
 router.use('/api/location', locationRoutes)
+router.use('/api/reminders', remindersRoutes)
 router.use('/api/upload', uploadRoutes)
 
 

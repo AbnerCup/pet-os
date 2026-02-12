@@ -50,7 +50,7 @@ export const getHealthRecordById = async (req: AuthRequest, res: Response) => {
 }
 
 export const createHealthRecord = async (req: AuthRequest, res: Response) => {
-  const { petId, type, title, date, nextDate, vetName, notes, status = 'pending' } = req.body
+  const { petId, type, title, date, nextDate, vetName, weight, temperature, notes, status = 'pending' } = req.body
 
   // Verificar que la mascota pertenece al usuario
   const pet = await prisma.pet.findFirst({
@@ -72,6 +72,8 @@ export const createHealthRecord = async (req: AuthRequest, res: Response) => {
       date: new Date(date),
       nextDate: nextDate ? new Date(nextDate) : null,
       vetName,
+      weight: weight ? parseFloat(weight) : null,
+      temperature: temperature ? parseFloat(temperature) : null,
       notes,
       status,
     }
@@ -86,7 +88,7 @@ export const createHealthRecord = async (req: AuthRequest, res: Response) => {
 
 export const updateHealthRecord = async (req: AuthRequest, res: Response) => {
   const { id } = req.params
-  const { type, title, date, nextDate, vetName, notes, status } = req.body
+  const { type, title, date, nextDate, vetName, weight, temperature, notes, status } = req.body
 
   // Verificar que el registro pertenece al usuario
   const existingRecord = await prisma.healthRecord.findFirst({
@@ -111,6 +113,8 @@ export const updateHealthRecord = async (req: AuthRequest, res: Response) => {
       ...(date && { date: new Date(date) }),
       ...(nextDate !== undefined && { nextDate: nextDate ? new Date(nextDate) : null }),
       ...(vetName !== undefined && { vetName }),
+      ...(weight !== undefined && { weight: weight ? parseFloat(weight) : null }),
+      ...(temperature !== undefined && { temperature: temperature ? parseFloat(temperature) : null }),
       ...(notes !== undefined && { notes }),
       ...(status && { status }),
     }

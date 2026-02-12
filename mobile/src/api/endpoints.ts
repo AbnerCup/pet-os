@@ -112,3 +112,17 @@ export const uploadApi = {
       },
     }),
 };
+
+export const remindersApi = {
+  getAll: (params?: { petId?: string; status?: string }) =>
+    api.get<ApiResponse<any[]>>('/reminders', { params }),
+
+  create: (data: any) =>
+    api.post<ApiResponse<any>>('/reminders', data),
+
+  updateStatus: (id: string, status: string) =>
+    api.patch<ApiResponse<any>>(`/reminders/${id}/status`, { status }),
+
+  delete: (id: string) =>
+    api.delete<ApiResponse<void>>(`/reminders/${id}`),
+};

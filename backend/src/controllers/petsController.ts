@@ -1,6 +1,7 @@
 import { Response } from 'express'
 import { prisma } from '../config/database'
 import { AuthRequest } from '../types'
+import { seedReminders } from '../utils/reminderSeeds'
 
 export const getPets = async (req: AuthRequest, res: Response) => {
   const pets = await prisma.pet.findMany({
@@ -16,6 +17,11 @@ export const getPets = async (req: AuthRequest, res: Response) => {
         select: { id: true, type: true, date: true, duration: true },
         orderBy: { date: 'desc' },
         take: 5
+      },
+      reminders: {
+        where: { status: 'PENDIENTE' },
+        orderBy: { dueDate: 'asc' },
+        take: 3
       }
     },
     orderBy: { createdAt: 'desc' }
@@ -36,6 +42,7 @@ export const getPetById = async (req: AuthRequest, res: Response) => {
       healthRecords: { orderBy: { date: 'desc' } },
       activities: { orderBy: { date: 'desc' }, take: 10 },
       expenses: { orderBy: { date: 'desc' }, take: 5 },
+      reminders: { orderBy: { dueDate: 'asc' } }
     }
   })
 
@@ -88,10 +95,21 @@ export const createPet = async (req: AuthRequest, res: Response) => {
     }
   })
 
+  // Generar recordatorios automáticos
+  await seedReminders(pet)
+
+  // Determinar si es adulto para el flag requiresOnboarding
+  const requiresOnboarding = pet.birthDate
+    ? (new Date().getTime() - new Date(pet.birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365) >= 1
+    : false
+
   res.status(201).json({
     success: true,
-    message: 'Mascota creada exitosamente',
-    data: pet
+    message: 'Mascota creada exitosamente y recordatorios programados',
+    data: {
+      ...pet,
+      requiresOnboarding
+    }
   })
 }
 

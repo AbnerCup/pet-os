@@ -18,7 +18,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  pets     Pet[]
+  pets          Pet[]
+  notifications Notification[]
+  pushToken     String?
 }
 
 model Pet {
@@ -37,22 +39,25 @@ model Pet {
   activities    Activity[]
   locations     LocationLog[]
   expenses      Expense[]
+  reminders     Reminder[]
 
   @@index([userId])
 }
 
 model HealthRecord {
-  id        String   @id @default(cuid())
-  petId     String
-  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
-  type      String
-  title     String
-  date      DateTime
-  nextDate  DateTime?
-  vetName   String?
-  notes     String?
-  status    String   @default("pending")
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  petId       String
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type        String
+  title       String
+  date        DateTime
+  nextDate    DateTime?
+  vetName     String?
+  weight      Float?
+  temperature Float?
+  notes       String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
 
   @@index([petId])
 }
@@ -91,6 +96,35 @@ model Expense {
   amount      Decimal  @db.Decimal(10, 2)
   date        DateTime
   description String?
+
+  @@index([userId])
+}
+
+model Reminder {
+  id              String   @id @default(cuid())
+  petId           String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type            String?
+  title           String?
+  dueDate         DateTime
+  status          String   @default("PENDIENTE")
+  isRecurring     Boolean  @default(false)
+  frequencyMonths Int?
+  createdAt       DateTime @default(now())
+
+  @@index([petId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("SYSTEM") // SYSTEM, REMINDER, HEALTH
+  read      Boolean  @default(false)
+  data      Json?
+  createdAt DateTime @default(now())
 
   @@index([userId])
 }

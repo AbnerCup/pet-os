@@ -34,6 +34,13 @@ export async function put(url: string, data: any) {
   })
 }
 
+export async function patch(url: string, data: any) {
+  return fetcher(url, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
 export async function del(url: string) {
   return fetcher(url, {
     method: 'DELETE',

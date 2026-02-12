@@ -104,13 +104,37 @@ export const login = async (req: AuthRequest, res: Response) => {
 export const getProfile = async (req: AuthRequest, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.id },
-    select: { id: true, email: true, name: true, plan: true, phone: true }
+    select: { id: true, email: true, name: true, plan: true, phone: true, pushToken: true }
   })
 
   res.json({
     success: true,
     data: user
   })
+}
+
+export const updatePushToken = async (req: AuthRequest, res: Response) => {
+  const { pushToken } = req.body
+
+  try {
+    await prisma.user.update({
+      where: { id: req.user!.id },
+      data: { pushToken }
+    })
+
+    logUserAction(req.user!.id, 'Updated push token')
+
+    res.json({
+      success: true,
+      message: 'Token push actualizado correctamente'
+    })
+  } catch (error) {
+    logError('Update push token failed', { userId: req.user?.id, error: (error as Error).message })
+    res.status(500).json({
+      success: false,
+      error: 'Error al actualizar el token push'
+    })
+  }
 }
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {

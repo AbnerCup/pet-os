@@ -3,79 +3,27 @@
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { usePets } from '@/hooks/usePets'
-import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle, Filter, Pill, Stethoscope, Heart } from 'lucide-react'
+import { useReminders } from '@/hooks/useReminders'
+import { Bell, Plus, Calendar, Clock, CheckCircle, AlertCircle, Filter, Trash2, Loader2 } from 'lucide-react'
 
 export default function RemindersPage() {
   const { user } = useAuth()
   const { pets } = usePets()
+  const { reminders, isLoading, createReminder, updateStatus, deleteReminder } = useReminders()
   const [selectedPet, setSelectedPet] = useState('')
   const [showAddForm, setShowAddForm] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const [formData, setFormData] = useState({
     petId: '',
     title: '',
-    type: '',
-    frequency: 'once',
+    type: 'medical',
     date: new Date().toISOString().split('T')[0],
     time: '09:00',
     notes: '',
-    isRecurring: false
+    isRecurring: false,
+    frequencyMonths: 0
   })
-
-  // Mock reminders data
-  const [reminders] = useState([
-    {
-      id: '1',
-      petId: '1',
-      title: 'Vacuna antirrábica',
-      type: 'medical',
-      frequency: 'yearly',
-      date: '2024-02-15',
-      time: '10:00',
-      notes: 'Recordatorio anual',
-      isRecurring: true,
-      isActive: true,
-      petName: 'Luna'
-    },
-    {
-      id: '2',
-      petId: '1',
-      title: 'Desparasitación',
-      type: 'medical',
-      frequency: 'monthly',
-      date: '2024-01-25',
-      time: '09:00',
-      notes: 'Pastilla mensual',
-      isRecurring: true,
-      isActive: true,
-      petName: 'Luna'
-    },
-    {
-      id: '3',
-      petId: '2',
-      title: 'Baño y corte',
-      type: 'grooming',
-      frequency: 'monthly',
-      date: '2024-01-30',
-      time: '14:00',
-      notes: 'Estética mensual',
-      isRecurring: true,
-      isActive: false,
-      petName: 'Max'
-    },
-    {
-      id: '4',
-      petId: '1',
-      title: 'Chequeo veterinario',
-      type: 'checkup',
-      frequency: 'once',
-      date: '2024-01-20',
-      time: '11:00',
-      notes: 'Control general',
-      isRecurring: false,
-      isActive: false,
-      petName: 'Luna'
-    }
-  ])
 
   const reminderTypes = [
     { value: 'medical', label: 'Salud', icon: '💊', color: 'bg-red-500' },
@@ -83,316 +31,309 @@ export default function RemindersPage() {
     { value: 'checkup', label: 'Chequeo', icon: '🩺', color: 'bg-blue-500' },
     { value: 'food', label: 'Alimentación', icon: '🍖', color: 'bg-green-500' },
     { value: 'exercise', label: 'Ejercicio', icon: '🏃', color: 'bg-orange-500' },
-    { value: 'other', label: 'Otro', icon: '📝', color: 'bg-gray-500' }
+    { value: 'other', label: 'Otro', icon: '📝', color: 'bg-gray-500' },
+    { value: 'VACUNA', label: 'Vacuna', icon: '💉', color: 'bg-blue-600' },
+    { value: 'DESPARASITACION', label: 'Desparasitación', icon: '🦠', color: 'bg-green-600' },
+    { value: 'HIGIENE', label: 'Higiene', icon: '🧼', color: 'bg-cyan-500' },
+    { value: 'CASTRACION', label: 'Esterilización', icon: '✂️', color: 'bg-pink-500' }
   ]
 
-  const frequencies = [
-    { value: 'once', label: 'Una vez' },
-    { value: 'daily', label: 'Diario' },
-    { value: 'weekly', label: 'Semanal' },
-    { value: 'monthly', label: 'Mensual' },
-    { value: 'yearly', label: 'Anual' }
-  ]
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.petId || !formData.title) return
 
-  const filteredReminders = reminders.filter(reminder => {
+    setIsSubmitting(true)
+    try {
+      await createReminder({
+        ...formData,
+        dueDate: `${formData.date}T${formData.time}:00.000Z`,
+        frequencyMonths: formData.isRecurring ? formData.frequencyMonths : null
+      })
+      setShowAddForm(false)
+      setFormData({
+        petId: '',
+        title: '',
+        type: 'medical',
+        date: new Date().toISOString().split('T')[0],
+        time: '09:00',
+        notes: '',
+        isRecurring: false,
+        frequencyMonths: 0
+      })
+    } catch (error) {
+      console.error(error)
+      alert('Error al crear el recordatorio')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('¿Eliminar este recordatorio?')) {
+      await deleteReminder(id)
+    }
+  }
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'PENDIENTE' ? 'COMPLETADO' : 'PENDIENTE'
+    await updateStatus(id, newStatus)
+  }
+
+  const filteredReminders = reminders.filter((reminder: any) => {
     if (selectedPet && reminder.petId !== selectedPet) return false
     return true
   })
 
+  const isOverdue = (date: string) => new Date(date) < new Date() && !isToday(date)
+  const isToday = (date: string) => new Date(date).toDateString() === new Date().toDateString()
+
   const stats = {
     total: filteredReminders.length,
-    active: filteredReminders.filter(r => r.isActive).length,
-    today: filteredReminders.filter(r => {
-      const today = new Date().toDateString()
-      return new Date(r.date).toDateString() === today
-    }).length,
-    upcoming: filteredReminders.filter(r => {
-      const reminderDate = new Date(r.date)
-      const now = new Date()
-      return reminderDate > now && reminderDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-    }).length
+    pending: filteredReminders.filter((r: any) => r.status === 'PENDIENTE').length,
+    today: filteredReminders.filter((r: any) => isToday(r.dueDate)).length,
+    completed: filteredReminders.filter((r: any) => r.status === 'COMPLETADO').length
   }
 
-  const getReminderIcon = (type: string) => {
-    return reminderTypes.find(t => t.value === type)?.icon || '📝'
-  }
-
-  const getReminderColor = (type: string) => {
-    return reminderTypes.find(t => t.value === type)?.color || 'bg-gray-500'
-  }
-
-  const getReminderLabel = (type: string) => {
-    return reminderTypes.find(t => t.value === type)?.label || 'Otro'
-  }
-
-  const getFrequencyLabel = (frequency: string) => {
-    return frequencies.find(f => f.value === frequency)?.label || 'Una vez'
-  }
-
-  const isOverdue = (date: string) => {
-    return new Date(date) < new Date()
-  }
-
-  const isToday = (date: string) => {
-    return new Date(date).toDateString() === new Date().toDateString()
-  }
-
-  const isUpcoming = (date: string) => {
-    const reminderDate = new Date(date)
-    const now = new Date()
-    return reminderDate > now && reminderDate <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <Loader2 className="w-8 h-8 animate-spin text-sage-600" />
+        <p className="mt-4 text-stone-600">Cargando recordatorios...</p>
+      </div>
+    )
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-6xl mx-auto pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-sage-900">Recordatorios</h1>
-          <p className="text-stone-600">Gestiona los recordatorios de cuidado de tus mascotas</p>
+          <h1 className="text-3xl font-bold text-sage-900">Recordatorios</h1>
+          <p className="text-stone-600 mt-1">Sigue el plan de salud de tus mascotas</p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="btn-primary flex items-center gap-2"
+          className="btn-primary flex items-center justify-center gap-2"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           Nuevo Recordatorio
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white rounded-2xl p-6 border border-sage-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-stone-600">Total</span>
-            <Bell className="w-5 h-5 text-stone-400" />
-          </div>
-          <p className="text-3xl font-bold text-sage-900">{stats.total}</p>
-          <p className="text-sm text-stone-500 mt-1">Recordatorios</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 border border-sage-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-stone-600">Activos</span>
-            <CheckCircle className="w-5 h-5 text-green-500" />
-          </div>
-          <p className="text-3xl font-bold text-sage-900">{stats.active}</p>
-          <p className="text-sm text-stone-500 mt-1">En curso</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 border border-sage-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-stone-600">Hoy</span>
-            <Calendar className="w-5 h-5 text-blue-500" />
-          </div>
-          <p className="text-3xl font-bold text-sage-900">{stats.today}</p>
-          <p className="text-sm text-stone-500 mt-1">Pendientes</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 border border-sage-200">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-stone-600">Próximos 7 días</span>
-            <Clock className="w-5 h-5 text-amber-500" />
-          </div>
-          <p className="text-3xl font-bold text-sage-900">{stats.upcoming}</p>
-          <p className="text-sm text-stone-500 mt-1">Próximos</p>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard label="Total" value={stats.total} icon={Bell} color="text-stone-600" />
+        <StatCard label="Pendientes" value={stats.pending} icon={Clock} color="text-amber-600" />
+        <StatCard label="Para Hoy" value={stats.today} icon={Calendar} color="text-blue-600" />
+        <StatCard label="Completados" value={stats.completed} icon={CheckCircle} color="text-green-600" />
       </div>
 
-      {/* Add Reminder Form */}
+      {/* Add Form */}
       {showAddForm && (
-        <div className="bg-white rounded-2xl p-6 border border-sage-200 mb-6">
-          <h3 className="text-lg font-semibold text-sage-900 mb-4">Nuevo Recordatorio</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Mascota</label>
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 border border-sage-200 shadow-sm mb-8 animate-in fade-in slide-in-from-top-4">
+          <h3 className="text-lg font-semibold text-sage-900 mb-6">Nuevo Recordatorio</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-stone-700">Mascota</label>
               <select
+                required
                 value={formData.petId}
-                onChange={(e) => setFormData({...formData, petId: e.target.value})}
-                className="w-full"
+                onChange={(e) => setFormData({ ...formData, petId: e.target.value })}
+                className="w-full rounded-xl border-stone-200 focus:ring-sage-500 focus:border-sage-500"
               >
-                <option value="">Seleccionar...</option>
-                {pets?.map(pet => (
+                <option value="">Seleccionar mascota...</option>
+                {pets?.map((pet: any) => (
                   <option key={pet.id} value={pet.id}>{pet.name}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Título</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-stone-700">Título</label>
               <input
+                required
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
-                placeholder="Ej: Vacuna, baño, medicación..."
-                className="w-full"
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Ej: Vacuna Rabia"
+                className="w-full rounded-xl border-stone-200"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Tipo</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-stone-700">Tipo</label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({...formData, type: e.target.value})}
-                className="w-full"
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                className="w-full rounded-xl border-stone-200"
               >
                 {reminderTypes.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.icon} {type.label}
-                  </option>
+                  <option key={type.value} value={type.value}>{type.label}</option>
                 ))}
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Frecuencia</label>
-              <select
-                value={formData.frequency}
-                onChange={(e) => setFormData({...formData, frequency: e.target.value})}
-                className="w-full"
-              >
-                {frequencies.map(freq => (
-                  <option key={freq.value} value={freq.value}>{freq.label}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Fecha</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-stone-700">Fecha</label>
               <input
+                required
                 type="date"
                 value={formData.date}
-                onChange={(e) => setFormData({...formData, date: e.target.value})}
-                className="w-full"
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full rounded-xl border-stone-200"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Hora</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-stone-700">Hora</label>
               <input
                 type="time"
                 value={formData.time}
-                onChange={(e) => setFormData({...formData, time: e.target.value})}
-                className="w-full"
+                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                className="w-full rounded-xl border-stone-200"
               />
             </div>
+            <div className="flex flex-col justify-end pb-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.isRecurring}
+                  onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+                  className="rounded text-sage-600 focus:ring-sage-500"
+                />
+                <span className="text-sm font-medium text-stone-700">¿Es recurrente?</span>
+              </label>
+            </div>
+            {formData.isRecurring && (
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-stone-700">Frecuencia (meses)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.frequencyMonths}
+                  onChange={(e) => setFormData({ ...formData, frequencyMonths: parseInt(e.target.value) })}
+                  className="w-full rounded-xl border-stone-200"
+                />
+              </div>
+            )}
           </div>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-stone-700 mb-1">Notas</label>
-            <input
-              type="text"
-              value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              placeholder="Detalles adicionales..."
-              className="w-full"
-            />
-          </div>
-          <div className="flex gap-3 mt-6">
-            <button
-              onClick={() => setShowAddForm(false)}
-              className="btn-secondary"
-            >
-              Cancelar
+          <div className="flex justify-end gap-3 mt-8">
+            <button type="button" onClick={() => setShowAddForm(false)} className="btn-secondary">Cancelar</button>
+            <button type="submit" disabled={isSubmitting} className="btn-primary">
+              {isSubmitting ? 'Creando...' : 'Guardar Recordatorio'}
             </button>
-            <button className="btn-primary">
-              Crear Recordatorio
-            </button>
           </div>
-        </div>
+        </form>
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-2xl p-6 border border-sage-200 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-sage-900">Filtros</h2>
-          <Filter className="w-5 h-5 text-stone-400" />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Mascota</label>
-            <select
-              value={selectedPet}
-              onChange={(e) => setSelectedPet(e.target.value)}
-              className="w-full"
-            >
-              <option value="">Todas las mascotas</option>
-              {pets?.map(pet => (
-                <option key={pet.id} value={pet.id}>{pet.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+      <div className="flex items-center gap-4 mb-8 bg-sage-50 p-4 rounded-2xl border border-sage-100">
+        <Filter className="w-5 h-5 text-sage-600" />
+        <select
+          value={selectedPet}
+          onChange={(e) => setSelectedPet(e.target.value)}
+          className="bg-transparent border-none text-sage-900 font-medium focus:ring-0 cursor-pointer"
+        >
+          <option value="">Todas las mascotas</option>
+          {pets?.map((pet: any) => (
+            <option key={pet.id} value={pet.id}>{pet.name}</option>
+          ))}
+        </select>
       </div>
 
-      {/* Reminders List */}
+      {/* List */}
       <div className="space-y-4">
-        {filteredReminders.map(reminder => {
-          const reminderType = reminderTypes.find(t => t.value === reminder.type)
-          const overdue = isOverdue(reminder.date)
-          const today = isToday(reminder.date)
-          const upcoming = isUpcoming(reminder.date)
-          
-          return (
-            <div key={reminder.id} className={`bg-white rounded-2xl p-6 border-2 ${
-              overdue ? 'border-red-200 bg-red-50' : 
-              today ? 'border-blue-200 bg-blue-50' : 
-              upcoming ? 'border-amber-200 bg-amber-50' : 
-              'border-sage-200'
-            }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 ${reminderType?.color || 'bg-gray-500'} rounded-xl flex items-center justify-center text-white text-lg`}>
-                    {getReminderIcon(reminder.type)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-stone-900">{reminder.title}</h3>
-                      <span className="text-sm text-stone-500">• {reminder.petName}</span>
-                      {reminder.isRecurring && (
-                        <span className="text-xs bg-sage-100 text-sage-700 px-2 py-1 rounded-full">
-                          {getFrequencyLabel(reminder.frequency)}
+        {filteredReminders.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-stone-300">
+            <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Bell className="w-8 h-8 text-stone-400" />
+            </div>
+            <p className="text-stone-500 font-medium">No hay recordatorios encontrados</p>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="text-sage-600 font-semibold mt-2 hover:underline"
+            >
+              Crea el primero ahora
+            </button>
+          </div>
+        ) : (
+          filteredReminders.map((reminder: any) => {
+            const typeInfo = reminderTypes.find(t => t.value === reminder.type) || reminderTypes[5]
+            const overdue = isOverdue(reminder.dueDate) && reminder.status === 'PENDIENTE'
+            const today = isToday(reminder.dueDate) && reminder.status === 'PENDIENTE'
+
+            return (
+              <div
+                key={reminder.id}
+                className={`group bg-white rounded-2xl p-5 border transition-all hover:shadow-md ${overdue ? 'border-red-200 shadow-sm shadow-red-50' :
+                    today ? 'border-blue-200 shadow-sm shadow-blue-50' :
+                      'border-stone-100'
+                  }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl ${typeInfo.color}`}>
+                      {typeInfo.icon}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className={`font-bold transition-all ${reminder.status === 'COMPLETADO' ? 'text-stone-400 line-through' : 'text-stone-900'}`}>
+                          {reminder.title}
+                        </h3>
+                        <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-xs rounded-full font-medium">
+                          {reminder.pet?.name}
                         </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-stone-600 mb-2">{reminder.notes}</p>
-                    <div className="flex items-center gap-4 text-xs text-stone-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {new Date(reminder.date).toLocaleDateString()}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {reminder.time}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        {getReminderIcon(reminder.type)}
-                        {getReminderLabel(reminder.type)}
-                      </span>
+                        {overdue && <span className="text-[10px] font-bold uppercase tracking-wider text-red-500 bg-red-50 px-2 py-0.5 rounded">Atrasado</span>}
+                        {today && <span className="text-[10px] font-bold uppercase tracking-wider text-blue-500 bg-blue-50 px-2 py-0.5 rounded">Para Hoy</span>}
+                      </div>
+
+                      <div className="flex items-center gap-4 mt-2 text-sm text-stone-500">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className={`w-4 h-4 ${overdue ? 'text-red-400' : ''}`} />
+                          {new Date(reminder.dueDate).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <CheckCircle className={`w-4 h-4 cursor-pointer transition-colors ${reminder.status === 'COMPLETADO' ? 'text-green-500' : 'text-stone-300'}`}
+                            onClick={() => handleToggleStatus(reminder.id, reminder.status)}
+                          />
+                          {reminder.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  {overdue && (
-                    <div className="flex items-center gap-1 text-red-600">
-                      <AlertCircle className="w-4 h-4" />
-                      <span className="text-xs font-medium">Vencido</span>
-                    </div>
-                  )}
-                  {today && (
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <Bell className="w-4 h-4" />
-                      <span className="text-xs font-medium">Hoy</span>
-                    </div>
-                  )}
-                  {upcoming && (
-                    <div className="flex items-center gap-1 text-amber-600">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-xs font-medium">Próximo</span>
-                    </div>
-                  )}
-                  <div className={`w-3 h-3 rounded-full ${
-                    reminder.isActive ? 'bg-green-500' : 'bg-stone-300'
-                  }`} />
+
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleToggleStatus(reminder.id, reminder.status)}
+                      className={`p-2 rounded-xl border transition-all ${reminder.status === 'COMPLETADO'
+                          ? 'bg-green-50 border-green-100 text-green-600'
+                          : 'bg-stone-50 border-stone-100 text-stone-400 hover:text-green-600 hover:bg-green-50'
+                        }`}
+                      title="Marcar como completado"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(reminder.id)}
+                      className="p-2 rounded-xl border border-stone-100 bg-stone-50 text-stone-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })
+        )}
       </div>
+    </div>
+  )
+}
+
+function StatCard({ label, value, icon: Icon, color }: any) {
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-stone-100 shadow-sm">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">{label}</span>
+        <Icon className={`w-5 h-5 ${color}`} />
+      </div>
+      <p className="text-3xl font-black text-stone-800">{value}</p>
     </div>
   )
 }

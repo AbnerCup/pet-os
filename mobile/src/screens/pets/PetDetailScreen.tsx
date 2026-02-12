@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import { usePet } from '../../hooks/usePets';
+import { usePet, useDeletePet } from '../../hooks/usePets';
 import { getPetImage, calculateAge } from '../../utils/helpers';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/types';
@@ -21,6 +21,29 @@ export const PetDetailScreen = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const { petId } = route.params;
     const { data: pet, isLoading } = usePet(petId);
+    const deletePet = useDeletePet();
+
+    const handleDelete = () => {
+        Alert.alert(
+            'Eliminar Mascota',
+            '¿Estás seguro de que deseas eliminar a ' + (pet?.name || 'esta mascota') + '? Esta acción no se puede deshacer.',
+            [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                    text: 'Eliminar',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            await deletePet.mutateAsync(petId);
+                            navigation.goBack();
+                        } catch (error) {
+                            Alert.alert('Error', 'No se pudo eliminar la mascota');
+                        }
+                    },
+                },
+            ]
+        );
+    };
 
     if (isLoading) {
         return (
@@ -98,9 +121,23 @@ export const PetDetailScreen = () => {
                 <View style={styles.infoCard}>
                     <InfoRow icon="calendar-outline" label="Fecha de Nacimiento" value={pet.birthDate ? new Date(pet.birthDate).toLocaleDateString() : 'No registrada'} />
                     <InfoRow icon="paw-outline" label="Especie" value={pet.species} />
-                    <InfoRow icon="time-outline" label="Registrado el" value={new Date(pet.createdAt).toLocaleDateString()} />
                 </View>
             </View>
+
+            <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={handleDelete}
+                disabled={deletePet.isPending}
+            >
+                {deletePet.isPending ? (
+                    <ActivityIndicator color="#e74c3c" />
+                ) : (
+                    <>
+                        <Ionicons name="trash-outline" size={20} color="#e74c3c" />
+                        <Text style={styles.deleteButtonText}>Eliminar Mascota</Text>
+                    </>
+                )}
+            </TouchableOpacity>
         </ScrollView>
     );
 };
@@ -250,5 +287,22 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#666',
         marginTop: 12,
+    },
+    deleteButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+        marginHorizontal: 24,
+        marginBottom: 40,
+        borderRadius: 12,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#ffcdd2',
+    },
+    deleteButtonText: {
+        color: '#e74c3c',
+        fontWeight: 'bold',
+        marginLeft: 8,
     },
 });

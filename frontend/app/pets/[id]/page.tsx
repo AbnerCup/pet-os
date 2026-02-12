@@ -1,14 +1,26 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePet } from '@/hooks/usePets';
 import { calculateAge, formatDate, getPetImage } from '@/lib/utils';
-import { ArrowLeft, Edit, Calendar, Activity, MapPin, Weight, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, Activity, MapPin, Weight, Loader2, AlertCircle, Trash2 } from 'lucide-react';
 
 export default function PetDetailPage() {
   const params = useParams();
-  const { pet, isLoading, isError } = usePet(params.id as string);
+  const router = useRouter();
+  const { pet, isLoading, isError, deletePet } = usePet(params.id as string);
+
+  const handleDelete = async () => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta mascota? Esta acción no se puede deshacer.')) {
+      try {
+        await deletePet();
+        router.push('/pets');
+      } catch (error) {
+        alert('Error al eliminar la mascota');
+      }
+    }
+  };
 
   if (isLoading) {
     return (
@@ -51,10 +63,19 @@ export default function PetDetailPage() {
                 <h1 className="text-3xl font-bold text-sage-900">{pet.name}</h1>
                 <p className="text-lg text-stone-600 mt-1">{pet.breed || pet.species}</p>
               </div>
-              <Link href={`/pets/${pet.id}/edit`} className="btn-secondary flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Editar
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href={`/pets/${pet.id}/edit`} className="btn-secondary flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Editar
+                </Link>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-xl border border-red-100 transition-colors"
+                  title="Eliminar mascota"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">

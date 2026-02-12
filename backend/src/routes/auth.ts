@@ -8,6 +8,7 @@ import { authLimiter } from '../middleware/rateLimiter'
 const router = Router()
 
 router.post('/change-password', authenticateToken, validate(changePasswordSchema), authController.changePassword)
+router.post('/push-token', authenticateToken, authController.updatePushToken)
 
 // POST /api/auth/register
 /**

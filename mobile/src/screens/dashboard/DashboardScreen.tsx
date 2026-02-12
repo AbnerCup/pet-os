@@ -82,7 +82,7 @@ export const DashboardScreen: React.FC<Props> = () => {
 
   const stats = useMemo(() => {
     if (!pets || !Array.isArray(pets)) {
-      return { totalPets: 0, expenses: '€0', pending: 0, activities: 0 };
+      return { totalPets: 0, expenses: 'Bs. 0', pending: 0, activities: 0 };
     }
 
     const totalExpenses = pets.reduce((sum, pet) => {
@@ -102,7 +102,7 @@ export const DashboardScreen: React.FC<Props> = () => {
 
     return {
       totalPets: pets.length,
-      expenses: `€${totalExpenses.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`,
+      expenses: `Bs. ${totalExpenses.toLocaleString('es-ES', { minimumFractionDigits: 2 })}`,
       pending: pendingHealth,
       activities: totalActivities,
     };

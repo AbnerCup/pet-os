@@ -62,7 +62,7 @@ export const ExpensesScreen = () => {
             </View>
 
             <View style={styles.expenseRight}>
-                <Text style={styles.expenseAmount}>€{parseFloat(item.amount).toFixed(2)}</Text>
+                <Text style={styles.expenseAmount}>Bs. {parseFloat(item.amount).toFixed(2)}</Text>
                 <TouchableOpacity
                     onPress={() => deleteExpenseMutation.mutate(item.id)}
                     style={styles.deleteButton}

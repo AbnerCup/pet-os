@@ -85,7 +85,7 @@ export default function DashboardPage() {
         <StatCard
           icon={Wallet}
           label="Gastos Totales"
-          value={`€${totalExpenses.toFixed(2)}`}
+          value={`Bs. ${totalExpenses.toFixed(2)}`}
           color="sage"
         />
         <StatCard

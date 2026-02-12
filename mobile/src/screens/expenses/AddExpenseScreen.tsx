@@ -118,7 +118,7 @@ export const AddExpenseScreen = () => {
             </View>
 
             <View style={styles.formGroup}>
-                <Text style={styles.label}>Monto (€) *</Text>
+                <Text style={styles.label}>Monto (Bs.) *</Text>
                 <TextInput
                     style={styles.input}
                     value={formData.amount}

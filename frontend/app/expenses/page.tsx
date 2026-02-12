@@ -216,7 +216,7 @@ export default function ExpensesPage() {
             <span className="text-sm font-medium text-stone-600">Total gastado</span>
             <Wallet className="w-5 h-5 text-stone-400" />
           </div>
-          <p className="text-3xl font-bold text-sage-900">${totalExpenses.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-sage-900">Bs. {totalExpenses.toFixed(2)}</p>
           <p className="text-sm text-stone-500 mt-1">
             {selectedPeriod === 'month' ? 'Este mes' :
               selectedPeriod === 'week' ? 'Esta semana' : 'Total periodo'}
@@ -228,7 +228,7 @@ export default function ExpensesPage() {
             <span className="text-sm font-medium text-stone-600">Este mes</span>
             <TrendingUp className="w-5 h-5 text-green-500" />
           </div>
-          <p className="text-3xl font-bold text-sage-900">${thisMonthExpenses.toFixed(2)}</p>
+          <p className="text-3xl font-bold text-sage-900">Bs. {thisMonthExpenses.toFixed(2)}</p>
           <p className="text-sm text-stone-500 mt-1">Gastos del mes actual</p>
         </div>
 
@@ -277,7 +277,7 @@ export default function ExpensesPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Monto ($)</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Monto (Bs.)</label>
               <input
                 type="number"
                 step="0.01"
@@ -347,7 +347,7 @@ export default function ExpensesPage() {
                       <span className="text-lg">{getCategoryIcon(category.value)}</span>
                       <span className="text-sm font-medium text-stone-700">{category.label}</span>
                     </div>
-                    <span className="text-sm font-bold text-sage-900">${category.total.toFixed(2)}</span>
+                    <span className="text-sm font-bold text-sage-900">Bs. {category.total.toFixed(2)}</span>
                   </div>
                   <div className="w-full bg-stone-200 rounded-full h-2">
                     <div
@@ -424,7 +424,7 @@ export default function ExpensesPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-sage-900">${Number(expense.amount).toFixed(2)}</p>
+                      <p className="font-bold text-sage-900">Bs. {Number(expense.amount).toFixed(2)}</p>
                       <p className="text-xs text-stone-500">{category?.label}</p>
                     </div>
                   </div>

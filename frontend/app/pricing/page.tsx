@@ -10,7 +10,7 @@ export default function PricingPage() {
   const { user, upgradePlan } = useAuth()
   const [selectedPlan, setSelectedPlan] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
-  
+
   const upgradeFeature = searchParams.get('upgrade')
 
   const plans = [
@@ -86,7 +86,7 @@ export default function PricingPage() {
   const handlePlanSelect = async (planId: string) => {
     setSelectedPlan(planId)
     setIsProcessing(true)
-    
+
     try {
       // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -123,7 +123,7 @@ export default function PricingPage() {
           Planes para cada necesidad
         </h1>
         <p className="text-xl text-stone-600 max-w-3xl mx-auto">
-          Elige el plan perfecto para cuidar a tus mascotas. 
+          Elige el plan perfecto para cuidar a tus mascotas.
           {user?.plan && `Tu plan actual: ${user.plan}`}
         </p>
       </div>
@@ -154,13 +154,12 @@ export default function PricingPage() {
         {plans.map((plan) => {
           const isCurrentPlan = user?.plan === plan.id
           const isUpgradePlan = isUpgrade(plan.id)
-          
+
           return (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-2xl border-2 ${
-                plan.popular ? 'border-sage-500 shadow-xl' : 'border-sage-200'
-              } ${isCurrentPlan ? 'ring-2 ring-green-500' : ''}`}
+              className={`relative bg-white rounded-2xl border-2 ${plan.popular ? 'border-sage-500 shadow-xl' : 'border-sage-200'
+                } ${isCurrentPlan ? 'ring-2 ring-green-500' : ''}`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -181,12 +180,12 @@ export default function PricingPage() {
 
               <div className="p-8">
                 <div className={`h-2 bg-gradient-to-r ${plan.color} rounded-full mb-6`} />
-                
+
                 <h3 className="text-2xl font-bold text-stone-900 mb-2">{plan.name}</h3>
                 <p className="text-stone-600 mb-6">{plan.description}</p>
-                
+
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-stone-900">${plan.price}</span>
+                  <span className="text-4xl font-bold text-stone-900">Bs. {plan.price}</span>
                   <span className="text-stone-600">/{plan.period}</span>
                 </div>
 
@@ -211,13 +210,12 @@ export default function PricingPage() {
                 <button
                   onClick={() => handlePlanSelect(plan.id)}
                   disabled={isCurrentPlan || isProcessing}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all ${
-                    isCurrentPlan
+                  className={`w-full py-3 rounded-xl font-semibold transition-all ${isCurrentPlan
                       ? 'bg-stone-100 text-stone-500 cursor-not-allowed'
                       : isUpgradePlan
-                      ? 'btn-primary'
-                      : 'btn-secondary'
-                  }`}
+                        ? 'btn-primary'
+                        : 'btn-secondary'
+                    }`}
                 >
                   {isCurrentPlan ? 'Plan Actual' : isUpgradePlan ? plan.cta : 'Downgrade'}
                 </button>
@@ -234,7 +232,7 @@ export default function PricingPage() {
           <div>
             <h3 className="font-semibold text-stone-900 mb-2">¿Puedo cambiar de plan?</h3>
             <p className="text-stone-600 text-sm">
-              Sí, puedes actualizar o cambiar tu plan en cualquier momento. 
+              Sí, puedes actualizar o cambiar tu plan en cualquier momento.
               Los cambios se aplican inmediatamente.
             </p>
           </div>

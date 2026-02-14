@@ -24,15 +24,15 @@ if (process.env.EXPO_PUBLIC_API_URL) {
 
 export const corsConfig = cors({
   origin: (origin, callback) => {
-    // 1. Obtenemos la URL de Vercel desde las variables de entorno de Railway
     const allowedProductionUrl = process.env.FRONTEND_URL;
 
     if (
-      !origin || // Permitir apps móviles/curl
+      !origin ||
       origin.startsWith('http://localhost') ||
       origin.startsWith('http://192.168.') ||
       origin.startsWith('exp://') ||
-      (allowedProductionUrl && origin === allowedProductionUrl) // <--- ¡Esto es lo nuevo!
+      origin.endsWith('.vercel.app') || // Permitir cualquier despliegue de Vercel
+      (allowedProductionUrl && origin === allowedProductionUrl)
     ) {
       callback(null, true);
     } else {

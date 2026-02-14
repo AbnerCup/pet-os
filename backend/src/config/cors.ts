@@ -24,20 +24,25 @@ if (process.env.EXPO_PUBLIC_API_URL) {
 
 export const corsConfig = cors({
   origin: (origin, callback) => {
-    // Permitir requests sin origen (curl, mobile apps) o locales
-    if (!origin ||
+    // 1. Obtenemos la URL de Vercel desde las variables de entorno de Railway
+    const allowedProductionUrl = process.env.FRONTEND_URL;
+
+    if (
+      !origin || // Permitir apps móviles/curl
       origin.startsWith('http://localhost') ||
       origin.startsWith('http://192.168.') ||
-      origin.startsWith('exp://')) {
-      callback(null, true)
+      origin.startsWith('exp://') ||
+      (allowedProductionUrl && origin === allowedProductionUrl) // <--- ¡Esto es lo nuevo!
+    ) {
+      callback(null, true);
     } else {
       console.log('Bloqueado por CORS:', origin);
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-})
+});
 
 export default corsConfig

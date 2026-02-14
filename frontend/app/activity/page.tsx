@@ -266,7 +266,7 @@ export default function ActivityPage() {
                 className="w-full"
               >
                 <option value="">Seleccionar...</option>
-                {pets?.map(pet => (
+                {pets?.map((pet: any) => (
                   <option key={pet.id} value={pet.id}>{pet.name}</option>
                 ))}
               </select>
@@ -351,7 +351,7 @@ export default function ActivityPage() {
               className="w-full"
             >
               <option value="">Todas las mascotas</option>
-              {pets?.map(pet => (
+              {pets?.map((pet: any) => (
                 <option key={pet.id} value={pet.id}>{pet.name}</option>
               ))}
             </select>

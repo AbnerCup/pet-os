@@ -18,10 +18,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const isPublicPath = PUBLIC_PATHS.some(path => pathname?.startsWith(path));
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && !isPublicPath) {
+    if (loading) return;
+
+    // Si no está autenticado y no es una ruta pública
+    if (!isAuthenticated && !isPublicPath) {
+      console.log('Redirecting to login from:', pathname);
       router.push('/auth/login');
     }
-  }, [loading, isAuthenticated, isPublicPath, router]);
+  }, [loading, isAuthenticated, isPublicPath, pathname, router]);
 
   if (loading && !isPublicPath) {
     return (

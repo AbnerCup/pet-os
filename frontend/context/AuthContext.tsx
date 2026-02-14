@@ -17,6 +17,7 @@ interface AuthContextType {
     isAuthenticated: boolean
     login: (email: string, password: string) => Promise<any>
     register: (userData: any) => Promise<any>
+    upgradePlan: (newPlan: string) => Promise<void>
     logout: () => void
     fetchUser: () => Promise<void>
 }
@@ -64,6 +65,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return post('/api/auth/register', userData)
     }
 
+    const upgradePlan = async (newPlan: string) => {
+        // Simular actualización de plan
+        setUser(prev => prev ? { ...prev, plan: newPlan as 'FREE' | 'BASIC' | 'FAMILY' } : null)
+        return Promise.resolve()
+    }
+
     const logout = () => {
         localStorage.removeItem('token')
         setUser(null)
@@ -72,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, register, logout, fetchUser }}>
+        <AuthContext.Provider value={{ user, loading, isAuthenticated: !!user, login, register, upgradePlan, logout, fetchUser }}>
             {children}
         </AuthContext.Provider>
     )

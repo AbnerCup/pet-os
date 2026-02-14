@@ -11,7 +11,8 @@ const allowedOrigins: string[] = [
   'http://192.168.1.38:8085',
   'http://192.168.1.38:8086',
   'exp://192.168.1.38:8081',
-  'exp://192.168.1.100:8081', // Expo development
+  'exp://192.168.1.100:8081',
+  'https://pet-os-tawny.vercel.app',
 ]
 
 if (process.env.FRONTEND_URL) {

@@ -1,11 +1,11 @@
 let API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-// Si la URL ya termina en /api, se lo quitamos porque los hooks ya lo incluyen
+
+// Limpieza robusta: eliminamos barras al final y el /api si ya viene incluido
+API_URL = API_URL.replace(/\/+$/, '') // Elimina slashes al final (ej: .../api/ -> .../api)
 if (API_URL.endsWith('/api')) {
-  API_URL = API_URL.slice(0, -4)
+  API_URL = API_URL.slice(0, -4) // Elimina el /api (ej: .../api -> ...)
 }
-if (API_URL.endsWith('/')) {
-  API_URL = API_URL.slice(0, -1)
-}
+API_URL = API_URL.replace(/\/+$/, '') // Elimina slashes que pudieron quedar antes del /api
 
 export async function fetcher(url: string, options?: RequestInit) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null

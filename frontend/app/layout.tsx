@@ -39,7 +39,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
     <>
       {isPublicPath ? (
         children
-      ) : (
+      ) : isAuthenticated ? (
         <div className="flex h-screen bg-stone-50">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
@@ -49,7 +49,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
             </main>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 }

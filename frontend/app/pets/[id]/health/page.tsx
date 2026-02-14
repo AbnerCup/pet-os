@@ -80,14 +80,13 @@ export default function HealthPage() {
             {records.map((record: any, index: number) => (
               <div key={record.id} className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    record.status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
-                    record.status === 'overdue' ? 'bg-red-100 text-red-600' :
-                    'bg-amber-100 text-amber-600'
-                  }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${record.status === 'completed' ? 'bg-emerald-100 text-emerald-600' :
+                      record.status === 'overdue' ? 'bg-red-100 text-red-600' :
+                        'bg-amber-100 text-amber-600'
+                    }`}>
                     {record.status === 'completed' ? <CheckCircle2 className="w-5 h-5" /> :
-                     record.status === 'overdue' ? <AlertCircle className="w-5 h-5" /> :
-                     <Clock className="w-5 h-5" />}
+                      record.status === 'overdue' ? <AlertCircle className="w-5 h-5" /> :
+                        <Clock className="w-5 h-5" />}
                   </div>
                   {index < records.length - 1 && <div className="w-0.5 h-full bg-sage-200 mt-2" />}
                 </div>

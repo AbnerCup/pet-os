@@ -3,8 +3,8 @@
 import useSWR from 'swr'
 import { fetcher, post, put, del } from '@/lib/api'
 
-export function useHealth() {
-    const { data, error, isLoading, mutate } = useSWR('/api/health', fetcher)
+export function useHealth(petId?: string) {
+    const { data, error, isLoading, mutate } = useSWR(petId ? `/api/pets/${petId}/health` : null, fetcher)
 
     return {
         records: data?.data || [],

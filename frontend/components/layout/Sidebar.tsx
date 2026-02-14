@@ -16,7 +16,8 @@ import {
   Stethoscope,
   Siren,
   Crown,
-  LogOut
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 
 const navigation = [
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Ubicación', href: '/location', icon: MapPin, plan: 'paid', feature: 'gps' },
   { name: 'Recordatorios', href: '/reminders', icon: Bell, plan: 'free' },
   { name: 'Gastos', href: '/expenses', icon: Wallet, plan: 'free' },
+  { name: 'Asistente AI', href: '/assistant', icon: Sparkles, plan: 'paid', feature: 'ai' },
   { name: 'Emergencia SOS', href: '/sos', icon: Siren, plan: 'premium', feature: 'sos' },
 ];
 

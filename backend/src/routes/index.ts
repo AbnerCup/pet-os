@@ -11,6 +11,8 @@ import locationRoutes from './location'
 import remindersRoutes from './reminders'
 
 import uploadRoutes from './upload'
+import chatbotRoutes from './chatbot'
+import emergencyRoutes from './emergency'
 
 const router = Router()
 
@@ -25,6 +27,8 @@ router.use('/api', expensesRoutes) // expenses/ y activities/
 router.use('/api/location', locationRoutes)
 router.use('/api/reminders', remindersRoutes)
 router.use('/api/upload', uploadRoutes)
+router.use('/api/chatbot', chatbotRoutes)
+router.use('/api/sos', emergencyRoutes)
 
 
 

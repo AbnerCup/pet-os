@@ -21,6 +21,38 @@ model User {
   pets          Pet[]
   notifications Notification[]
   pushToken     String?
+  chatbotInteractions ChatbotInteraction[]
+  emergencies         Emergency[]
+}
+
+model Emergency {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  petId         String
+  pet           Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type          String    // accident, poisoning, illness, lost, aggression
+  status        String    @default("ACTIVE") // ACTIVE, RESOLVED, CANCELLED
+  latitude      Float?
+  longitude     Float?
+  resolvedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([petId])
+  @@index([status])
+}
+
+model ChatbotInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt    String
+  response  String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model Pet {
@@ -40,6 +72,7 @@ model Pet {
   locations     LocationLog[]
   expenses      Expense[]
   reminders     Reminder[]
+  emergencies   Emergency[]
 
   @@index([userId])
 }

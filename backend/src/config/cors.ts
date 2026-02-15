@@ -29,10 +29,12 @@ export const corsConfig = cors({
 
     if (
       !origin ||
+      origin === 'null' || // Mobile apps (APK) send null origin
       origin.startsWith('http://localhost') ||
       origin.startsWith('http://192.168.') ||
       origin.startsWith('exp://') ||
       origin.endsWith('.vercel.app') || // Permitir cualquier despliegue de Vercel
+      origin.endsWith('.up.railway.app') || // Permitir despliegues de Railway
       (allowedProductionUrl && origin === allowedProductionUrl)
     ) {
       callback(null, true);

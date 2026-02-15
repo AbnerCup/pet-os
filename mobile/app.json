@@ -18,8 +18,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.petos.mobile",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Pet OS necesita acceso a tu ubicaci\u00f3n para mostrar el mapa de mascotas",
-        "NSLocationAlwaysUsageDescription": "Pet OS usa tu ubicaci\u00f3n para alertas de zonas seguras"
+        "NSLocationWhenInUseUsageDescription": "Pet OS necesita acceso a tu ubicación para mostrar el mapa de mascotas",
+        "NSLocationAlwaysUsageDescription": "Pet OS usa tu ubicación para alertas de zonas seguras"
       }
     },
     "android": {
@@ -28,10 +28,15 @@
         "backgroundColor": "#7c9a6b"
       },
       "package": "com.petos.mobile",
+      "versionCode": 1,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_BACKGROUND_LOCATION"
+        "ACCESS_BACKGROUND_LOCATION",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "plugins": [
@@ -39,11 +44,18 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Pet OS necesita acceso a tu ubicaci\u00f3n para mostrar el mapa de mascotas"
+          "locationAlwaysAndWhenInUsePermission": "Pet OS necesita acceso a tu ubicación para mostrar el mapa de mascotas"
         }
       ],
       "expo-notifications"
     ],
-    "sdkVersion": "54.0.0"
+    "sdkVersion": "54.0.0",
+    "extra": {
+      "apiUrl": "https://pet-os-production.up.railway.app/api",
+      "eas": {
+        "projectId": "0fe21d98-c53d-4666-b1ff-ade3d9677b57"
+      }
+    },
+    "owner": "abnercup"
   }
 }

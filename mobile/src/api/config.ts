@@ -2,13 +2,17 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-// Configura tu IP local para desarrollo
+// URL de producción en Railway
+const PRODUCTION_API_URL = 'https://pet-os-production.up.railway.app/api';
+
+// URL de desarrollo local
+const DEV_API_URL = 'http://192.168.1.38:3001/api';
+
 const getBaseURL = () => {
   if (__DEV__) {
-    // Android emulator usa 10.0.2.2, iOS simulator usa localhost
-    return 'http://192.168.1.38:3001/api';
+    return DEV_API_URL;
   }
-  return 'https://tu-api-produccion.com/api';
+  return PRODUCTION_API_URL;
 };
 
 export const api = axios.create({

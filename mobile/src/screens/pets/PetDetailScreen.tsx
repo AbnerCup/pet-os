@@ -48,7 +48,7 @@ export const PetDetailScreen = () => {
     if (isLoading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
+                <ActivityIndicator size="large" color="#5c7a4b" />
             </View>
         );
     }
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     badgeText: {
         fontSize: 12,
         fontWeight: '600',
-        color: '#7c9a6b',
+        color: '#5c7a4b',
     },
     actionsGrid: {
         flexDirection: 'row',

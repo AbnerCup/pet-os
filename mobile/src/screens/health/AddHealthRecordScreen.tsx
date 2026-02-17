@@ -71,7 +71,7 @@ export const AddHealthRecordScreen = () => {
                 <Text style={styles.navTitle}>Nuevo Registro Médico</Text>
                 <TouchableOpacity onPress={handleSave} disabled={addMutation.isPending}>
                     {addMutation.isPending ? (
-                        <ActivityIndicator size="small" color="#7c9a6b" />
+                        <ActivityIndicator size="small" color="#5c7a4b" />
                     ) : (
                         <Text style={styles.saveButtonText}>Guardar</Text>
                     )}
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     },
     backButton: { padding: 5 },
     navTitle: { fontSize: 17, fontWeight: 'bold', color: '#333' },
-    saveButtonText: { fontSize: 16, fontWeight: 'bold', color: '#7c9a6b' },
+    saveButtonText: { fontSize: 16, fontWeight: 'bold', color: '#5c7a4b' },
     content: { flex: 1, padding: 20 },
     section: { marginBottom: 20 },
     row: { flexDirection: 'row' },
@@ -211,9 +211,9 @@ const styles = StyleSheet.create({
     },
     typeItemActive: {
         backgroundColor: '#f0f5ee',
-        borderColor: '#7c9a6b',
+        borderColor: '#5c7a4b',
     },
     typeIcon: { fontSize: 20, marginBottom: 5 },
     typeLabel: { fontSize: 11, color: '#666' },
-    typeLabelActive: { color: '#7c9a6b', fontWeight: 'bold' },
+    typeLabelActive: { color: '#5c7a4b', fontWeight: 'bold' },
 });

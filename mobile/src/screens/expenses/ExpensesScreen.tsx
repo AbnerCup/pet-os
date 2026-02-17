@@ -49,8 +49,8 @@ export const ExpensesScreen = () => {
 
     const renderExpenseItem = ({ item }: { item: any }) => (
         <View style={styles.expenseItem}>
-            <View style={[styles.categoryIcon, { backgroundColor: '#7c9a6b20' }]}>
-                <Ionicons name={getCategoryIcon(item.category)} size={24} color="#7c9a6b" />
+            <View style={[styles.categoryIcon, { backgroundColor: '#5c7a4b20' }]}>
+                <Ionicons name={getCategoryIcon(item.category)} size={24} color="#5c7a4b" />
             </View>
 
             <View style={styles.expenseInfo}>
@@ -76,7 +76,7 @@ export const ExpensesScreen = () => {
     if (isLoading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
+                <ActivityIndicator size="large" color="#5c7a4b" />
             </View>
         );
     }
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 24,
         bottom: 24,
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         width: 56,
         height: 56,
         borderRadius: 28,

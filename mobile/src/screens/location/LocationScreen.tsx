@@ -266,7 +266,7 @@ export const LocationScreen = () => {
                     refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
                 >
                     {isPetsLoading ? (
-                        <ActivityIndicator color="#7c9a6b" style={{ marginTop: 20 }} />
+                        <ActivityIndicator color="#5c7a4b" style={{ marginTop: 20 }} />
                     ) : (
                         petsWithLoc.map(pet => (
                             <PetLocationCard

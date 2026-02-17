@@ -136,7 +136,7 @@ export const NotificationsScreen = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Notificaciones</Text>
                 <TouchableOpacity>
-                    <Ionicons name="checkmark-done-circle" size={24} color="#7c9a6b" />
+                    <Ionicons name="checkmark-done-circle" size={24} color="#5c7a4b" />
                 </TouchableOpacity>
             </View>
 
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
         marginRight: 8
     },
     activeTab: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
     },
     tabText: {
         color: '#666',

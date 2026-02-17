@@ -160,7 +160,7 @@ export const DevLogsScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7c9a6b" />
+          <ActivityIndicator size="large" color="#5c7a4b" />
         </View>
       </SafeAreaView>
     );
@@ -212,11 +212,11 @@ export const DevLogsScreen: React.FC = () => {
 
       <View style={styles.actionsContainer}>
         <TouchableOpacity style={styles.actionButton} onPress={handleFlushLogs}>
-          <Ionicons name="cloud-upload" size={20} color="#7c9a6b" />
+          <Ionicons name="cloud-upload" size={20} color="#5c7a4b" />
           <Text style={styles.actionText}>Enviar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton} onPress={handleShareLogs}>
-          <Ionicons name="share-outline" size={20} color="#7c9a6b" />
+          <Ionicons name="share-outline" size={20} color="#5c7a4b" />
           <Text style={styles.actionText}>Exportar</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.actionButton, styles.actionButtonDanger]} onPress={handleClearLogs}>
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   filterButtonActive: {
-    backgroundColor: '#7c9a6b',
+    backgroundColor: '#5c7a4b',
   },
   filterText: {
     fontSize: 12,
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     marginLeft: 6,
-    color: '#7c9a6b',
+    color: '#5c7a4b',
     fontWeight: '500',
   },
   actionTextDanger: {
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   logScreen: {
     fontSize: 11,
-    color: '#7c9a6b',
+    color: '#5c7a4b',
     flex: 1,
   },
   logMessage: {

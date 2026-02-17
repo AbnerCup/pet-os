@@ -29,7 +29,7 @@ export const SettingsScreen: React.FC<RootStackScreenProps<'Settings'>> = ({ nav
                 <Switch
                     value={value}
                     onValueChange={onValueChange}
-                    trackColor={{ false: '#ddd', true: '#7c9a6b' }}
+                    trackColor={{ false: '#ddd', true: '#5c7a4b' }}
                     thumbColor="#fff"
                 />
             ) : (
@@ -53,7 +53,7 @@ export const SettingsScreen: React.FC<RootStackScreenProps<'Settings'>> = ({ nav
                     <Text style={styles.sectionTitle}>Cuenta</Text>
                     {renderSettingItem('person-outline', 'Editar Perfil', () => navigation.navigate('EditProfile'), undefined, undefined, '#4a90e2')}
                     {renderSettingItem('lock-closed-outline', 'Cambiar Contraseña', () => navigation.navigate('ChangePassword'), undefined, undefined, '#f5a623')}
-                    {renderSettingItem('notifications-outline', 'Notificaciones App', () => navigation.navigate('Notifications'), undefined, undefined, '#7c9a6b')}
+                    {renderSettingItem('notifications-outline', 'Notificaciones App', () => navigation.navigate('Notifications'), undefined, undefined, '#5c7a4b')}
                 </View>
 
                 <View style={sectionStyles.section}>

@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../hooks/useAuth';
@@ -44,7 +45,11 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Ionicons name="paw" size={64} color="#fff" />
+            <Image
+              source={require('../../../assets/adaptive-icon-foreground.png')}
+              style={{ width: 120, height: 120 }}
+              resizeMode="contain"
+            />
           </View>
           <Text style={styles.title}>Pet OS</Text>
           <Text style={styles.subtitle}>Cuida de tus mascotas</Text>
@@ -52,7 +57,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color="#7c9a6b" style={styles.inputIcon} />
+            <Ionicons name="mail-outline" size={20} color="#5c7a4b" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email"
@@ -65,7 +70,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#7c9a6b" style={styles.inputIcon} />
+            <Ionicons name="lock-closed-outline" size={20} color="#5c7a4b" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Contraseña"
@@ -81,7 +86,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
               <Ionicons
                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={20}
-                color="#7c9a6b"
+                color="#5c7a4b"
               />
             </TouchableOpacity>
           </View>
@@ -124,7 +129,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#7c9a6b',
+    backgroundColor: '#5c7a4b',
   },
   scrollContent: {
     flexGrow: 1,
@@ -190,11 +195,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   forgotPasswordText: {
-    color: '#7c9a6b',
+    color: '#5c7a4b',
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#7c9a6b',
+    backgroundColor: '#5c7a4b',
     borderRadius: 12,
     height: 50,
     justifyContent: 'center',
@@ -218,7 +223,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   registerLink: {
-    color: '#7c9a6b',
+    color: '#5c7a4b',
     fontSize: 14,
     fontWeight: '600',
   },

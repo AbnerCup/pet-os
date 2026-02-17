@@ -72,7 +72,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 
                 <View style={styles.form}>
                     <View style={styles.inputContainer}>
-                        <Ionicons name="person-outline" size={20} color="#7c9a6b" style={styles.inputIcon} />
+                        <Ionicons name="person-outline" size={20} color="#5c7a4b" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Nombre completo"
@@ -83,7 +83,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Ionicons name="mail-outline" size={20} color="#7c9a6b" style={styles.inputIcon} />
+                        <Ionicons name="mail-outline" size={20} color="#5c7a4b" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Email"
@@ -96,7 +96,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Ionicons name="lock-closed-outline" size={20} color="#7c9a6b" style={styles.inputIcon} />
+                        <Ionicons name="lock-closed-outline" size={20} color="#5c7a4b" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Contraseña"
@@ -112,13 +112,13 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
                             <Ionicons
                                 name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                                 size={20}
-                                color="#7c9a6b"
+                                color="#5c7a4b"
                             />
                         </TouchableOpacity>
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Ionicons name="lock-check-outline" size={20} color="#7c9a6b" style={styles.inputIcon} />
+                        <Ionicons name="lock-check-outline" size={20} color="#5c7a4b" style={styles.inputIcon} />
                         <TextInput
                             style={styles.input}
                             placeholder="Confirmar contraseña"
@@ -156,7 +156,7 @@ export const RegisterScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
     },
     scrollContent: {
         flexGrow: 1,
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
         padding: 4,
     },
     registerButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         borderRadius: 12,
         height: 50,
         justifyContent: 'center',
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     loginLink: {
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         fontSize: 14,
         fontWeight: '600',
     },

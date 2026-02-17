@@ -187,7 +187,7 @@ export const PetTrackingScreen = () => {
     if (isLoading && !currentLocation) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
+                <ActivityIndicator size="large" color="#5c7a4b" />
                 <Text style={styles.loadingText}>Cargando mapa...</Text>
             </View>
         );

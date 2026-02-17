@@ -181,7 +181,7 @@ export const DashboardScreen: React.FC<Props> = () => {
           title="Mascotas"
           value={stats.totalPets}
           icon="paw"
-          color="#7c9a6b"
+          color="#5c7a4b"
           onPress={() => navigation.navigate('Main', { screen: 'Pets' })}
         />
         <StatCard
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   seeAll: {
-    color: '#7c9a6b',
+    color: '#5c7a4b',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   },
   petAge: {
     fontSize: 11,
-    color: '#7c9a6b',
+    color: '#5c7a4b',
     textAlign: 'center',
     marginTop: 2,
     fontWeight: '500',
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   addButton: {
-    backgroundColor: '#7c9a6b',
+    backgroundColor: '#5c7a4b',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,

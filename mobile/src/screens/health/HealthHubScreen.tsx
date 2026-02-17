@@ -40,7 +40,7 @@ export const HealthHubScreen = () => {
 
     const getStatusInfo = (status: string) => {
         switch (status) {
-            case 'completed': return { icon: 'checkmark-circle', color: '#7c9a6b', label: 'Completado' };
+            case 'completed': return { icon: 'checkmark-circle', color: '#5c7a4b', label: 'Completado' };
             case 'overdue': return { icon: 'alert-circle', color: '#e74c3c', label: 'Vencido' };
             default: return { icon: 'time', color: '#f5a623', label: 'Pendiente' };
         }
@@ -49,7 +49,7 @@ export const HealthHubScreen = () => {
     if (isLoading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
+                <ActivityIndicator size="large" color="#5c7a4b" />
             </View>
         );
     }
@@ -95,7 +95,7 @@ export const HealthHubScreen = () => {
 
                                     {!petId && record.pet?.name && (
                                         <View style={styles.petTag}>
-                                            <Ionicons name="paw" size={12} color="#7c9a6b" />
+                                            <Ionicons name="paw" size={12} color="#5c7a4b" />
                                             <Text style={styles.petTagName}>{record.pet.name}</Text>
                                         </View>
                                     )}
@@ -112,7 +112,7 @@ export const HealthHubScreen = () => {
                     })
                 ) : (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="checkmark-done-circle-outline" size={80} color="#7c9a6b" />
+                        <Ionicons name="checkmark-done-circle-outline" size={80} color="#5c7a4b" />
                         <Text style={styles.emptyText}>¡Todo al día!</Text>
                         <Text style={styles.emptySubtext}>No hay recordatorios de salud pendientes.</Text>
                     </View>
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
         marginTop: 5,
         marginBottom: 5,
     },
-    petTagName: { fontSize: 11, color: '#7c9a6b', fontWeight: 'bold', marginLeft: 4 },
+    petTagName: { fontSize: 11, color: '#5c7a4b', fontWeight: 'bold', marginLeft: 4 },
     emptyContainer: { alignItems: 'center', paddingTop: 60 },
     emptyText: { fontSize: 20, fontWeight: 'bold', color: '#333', marginTop: 15 },
     emptySubtext: { fontSize: 14, color: '#666', marginTop: 8, textAlign: 'center' },
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,

@@ -125,7 +125,7 @@ export const EditPetScreen = () => {
     if (isFetching) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
+                <ActivityIndicator size="large" color="#5c7a4b" />
             </View>
         );
     }
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
         borderColor: '#eee',
     },
     saveButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         borderRadius: 12,
         padding: 16,
         alignItems: 'center',
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 5,
         right: 5,
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         width: 32,
         height: 32,
         borderRadius: 16,

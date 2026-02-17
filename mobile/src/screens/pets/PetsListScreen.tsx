@@ -94,7 +94,7 @@ export const PetsListScreen: React.FC<PetsListScreenProps> = () => {
         <View style={styles.container}>
             {isLoading ? (
                 <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" color="#7c9a6b" />
+                    <ActivityIndicator size="large" color="#5c7a4b" />
                 </View>
             ) : !pets || pets.length === 0 ? (
                 <View style={styles.centerContainer}>
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     addButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 6,

@@ -58,7 +58,7 @@ export const ChangePasswordScreen: React.FC<RootStackScreenProps<'ChangePassword
 
             <ScrollView style={styles.container}>
                 <View style={styles.infoBox}>
-                    <Ionicons name="information-circle-outline" size={20} color="#7c9a6b" />
+                    <Ionicons name="information-circle-outline" size={20} color="#5c7a4b" />
                     <Text style={styles.infoText}>
                         Tu contraseña debe tener al menos 8 caracteres e incluir letras y números.
                     </Text>
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f9f9f9',
     },
     updateButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         marginHorizontal: 20,
         marginVertical: 30,
         paddingVertical: 16,

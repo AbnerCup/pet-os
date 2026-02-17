@@ -66,7 +66,7 @@ export const AgendaScreen = () => {
                 </TouchableOpacity>
                 <Text style={styles.navTitle}>Agenda de {petName}</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AddHealthRecord', { petId })}>
-                    <Ionicons name="add" size={28} color="#7c9a6b" />
+                    <Ionicons name="add" size={28} color="#5c7a4b" />
                 </TouchableOpacity>
             </View>
 
@@ -121,7 +121,7 @@ export const AgendaScreen = () => {
                                     <Text style={[styles.taskTitle, styles.completedText]}>{record.title}</Text>
                                     <Text style={styles.taskType}>{format(new Date(record.date), 'PP', { locale: es })}</Text>
                                 </View>
-                                <Ionicons name="checkmark-circle" size={28} color="#7c9a6b" />
+                                <Ionicons name="checkmark-circle" size={28} color="#5c7a4b" />
                             </View>
                         ))}
                     </View>

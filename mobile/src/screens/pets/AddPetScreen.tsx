@@ -187,7 +187,7 @@ export const AddPetScreen = () => {
                                 </View>
                             ) : (
                                 <View style={styles.photoPlaceholder}>
-                                    <Ionicons name="camera-outline" size={32} color="#7c9a6b" />
+                                    <Ionicons name="camera-outline" size={32} color="#5c7a4b" />
                                     <Text style={styles.photoPlaceholderText}>Añadir Foto</Text>
                                 </View>
                             )}
@@ -220,7 +220,7 @@ export const AddPetScreen = () => {
                                     <Ionicons
                                         name={s.icon as any}
                                         size={24}
-                                        color={formData.species === s.id ? '#fff' : '#7c9a6b'}
+                                        color={formData.species === s.id ? '#fff' : '#5c7a4b'}
                                     />
                                     <Text style={[
                                         styles.speciesLabel,
@@ -262,7 +262,7 @@ export const AddPetScreen = () => {
                                 style={styles.dateInput}
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Ionicons name="calendar-outline" size={20} color="#7c9a6b" style={{ marginRight: 8 }} />
+                                <Ionicons name="calendar-outline" size={20} color="#5c7a4b" style={{ marginRight: 8 }} />
                                 <Text style={styles.dateInputText}>
                                     {format(date, 'dd/MM/yyyy', { locale: es })}
                                 </Text>
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
     },
     photoPlaceholderText: {
         fontSize: 10,
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         marginTop: 4,
         fontWeight: 'bold',
     },
@@ -442,13 +442,13 @@ const styles = StyleSheet.create({
         borderColor: '#e0eade',
     },
     activeSpeciesCard: {
-        backgroundColor: '#7c9a6b',
-        borderColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
+        borderColor: '#5c7a4b',
     },
     speciesLabel: {
         fontSize: 12,
         fontWeight: '600',
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         marginTop: 6,
     },
     activeSpeciesLabel: {
@@ -458,14 +458,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     saveButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         borderRadius: 12,
         padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 10,
-        shadowColor: '#7c9a6b',
+        shadowColor: '#5c7a4b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,

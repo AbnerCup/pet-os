@@ -134,7 +134,7 @@ export const AddExpenseScreen = () => {
                     style={styles.dateInput}
                     onPress={() => setShowDatePicker(true)}
                 >
-                    <Ionicons name="calendar-outline" size={20} color="#7c9a6b" style={{ marginRight: 8 }} />
+                    <Ionicons name="calendar-outline" size={20} color="#5c7a4b" style={{ marginRight: 8 }} />
                     <Text style={styles.dateInputText}>
                         {format(date, 'dd/MM/yyyy', { locale: es })}
                     </Text>
@@ -245,8 +245,8 @@ const styles = StyleSheet.create({
         borderColor: '#e0e0e0',
     },
     activePetChip: {
-        backgroundColor: '#7c9a6b',
-        borderColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
+        borderColor: '#5c7a4b',
     },
     petChipText: {
         color: '#666',
@@ -269,26 +269,26 @@ const styles = StyleSheet.create({
         borderColor: '#eee',
     },
     activeCategoryChip: {
-        backgroundColor: '#7c9a6b20',
-        borderColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b20',
+        borderColor: '#5c7a4b',
     },
     categoryChipText: {
         color: '#666',
         fontSize: 13,
     },
     activeCategoryChipText: {
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         fontWeight: 'bold',
     },
     saveButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         borderRadius: 12,
         padding: 16,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         marginTop: 12,
-        shadowColor: '#7c9a6b',
+        shadowColor: '#5c7a4b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,

@@ -15,7 +15,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <ScrollView style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.avatar}>
-                    <Ionicons name="person" size={50} color="#7c9a6b" />
+                    <Ionicons name="person" size={50} color="#5c7a4b" />
                 </View>
                 <Text style={styles.name}>{user?.name || 'Usuario'}</Text>
                 <Text style={styles.email}>{user?.email || 'email@example.com'}</Text>
@@ -92,13 +92,13 @@ const styles = StyleSheet.create({
     },
     editButton: {
         borderWidth: 1,
-        borderColor: '#7c9a6b',
+        borderColor: '#5c7a4b',
         paddingHorizontal: 20,
         paddingVertical: 8,
         borderRadius: 20,
     },
     editButtonText: {
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         fontSize: 14,
         fontWeight: '600',
     },

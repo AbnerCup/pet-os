@@ -89,7 +89,7 @@ export const AddActivityScreen = () => {
                 <Text style={styles.navTitle}>Nueva Actividad</Text>
                 <TouchableOpacity onPress={handleSubmit} disabled={isSubmitting}>
                     {isSubmitting ? (
-                        <ActivityIndicator size="small" color="#7c9a6b" />
+                        <ActivityIndicator size="small" color="#5c7a4b" />
                     ) : (
                         <Text style={styles.saveText}>Guardar</Text>
                     )}
@@ -218,12 +218,12 @@ const styles = StyleSheet.create({
         borderBottomColor: '#f0f0f0',
     },
     navTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
-    saveText: { color: '#7c9a6b', fontWeight: 'bold', fontSize: 16 },
+    saveText: { color: '#5c7a4b', fontWeight: 'bold', fontSize: 16 },
     content: { padding: 20 },
     sectionLabel: { fontSize: 13, color: '#999', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 12, marginTop: 10 },
     petSelector: { marginBottom: 20 },
     petChip: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, backgroundColor: '#f0f0f0', marginRight: 10 },
-    petChipSelected: { backgroundColor: '#7c9a6b' },
+    petChipSelected: { backgroundColor: '#5c7a4b' },
     petChipText: { color: '#666', fontWeight: '500' },
     petChipTextSelected: { color: '#fff' },
     typesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
@@ -237,10 +237,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#f0f0f0'
     },
-    typeItemSelected: { borderColor: '#7c9a6b', backgroundColor: '#f0f5ee' },
+    typeItemSelected: { borderColor: '#5c7a4b', backgroundColor: '#f0f5ee' },
     typeIcon: { fontSize: 24, marginBottom: 5 },
     typeLabel: { fontSize: 11, color: '#666' },
-    typeLabelSelected: { color: '#7c9a6b', fontWeight: 'bold' },
+    typeLabelSelected: { color: '#5c7a4b', fontWeight: 'bold' },
     inputGroup: { marginBottom: 15 },
     label: { fontSize: 14, color: '#333', marginBottom: 8, fontWeight: '500' },
     inputWithIcon: {
@@ -257,12 +257,12 @@ const styles = StyleSheet.create({
     inputText: { marginLeft: 10, fontSize: 15, color: '#333' },
     textArea: { height: 100, textAlignVertical: 'top', paddingTop: 12 },
     submitButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         height: 56,
         borderRadius: 28,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#7c9a6b',
+        shadowColor: '#5c7a4b',
         shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.3,
         shadowRadius: 10,

@@ -34,7 +34,7 @@ export const MainTabNavigator: React.FC = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#7c9a6b',
+        tabBarActiveTintColor: '#5c7a4b',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: {
           // Altura dinamica basada en los insets del dispositivo
@@ -69,7 +69,7 @@ export const MainTabNavigator: React.FC = () => {
         },
         headerShown: true,
         headerStyle: {
-          backgroundColor: '#7c9a6b',
+          backgroundColor: '#5c7a4b',
         },
         headerTintColor: '#fff',
         headerTitleStyle: {

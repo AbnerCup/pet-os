@@ -53,7 +53,7 @@ export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = 
             <ScrollView style={styles.container}>
                 <View style={styles.avatarSection}>
                     <View style={styles.avatar}>
-                        <Ionicons name="person" size={50} color="#7c9a6b" />
+                        <Ionicons name="person" size={50} color="#5c7a4b" />
                         <TouchableOpacity style={styles.changeAvatarButton}>
                             <Ionicons name="camera" size={20} color="#fff" />
                         </TouchableOpacity>
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     },
     saveText: {
         fontSize: 16,
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         fontWeight: '600',
     },
     container: {
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: 0,
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         width: 32,
         height: 32,
         borderRadius: 16,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     },
     changePhotoText: {
         marginTop: 12,
-        color: '#7c9a6b',
+        color: '#5c7a4b',
         fontSize: 14,
         fontWeight: '600',
     },
@@ -195,13 +195,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#f9f9f9',
     },
     updateButton: {
-        backgroundColor: '#7c9a6b',
+        backgroundColor: '#5c7a4b',
         marginHorizontal: 20,
         marginVertical: 30,
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: 'center',
-        shadowColor: '#7c9a6b',
+        shadowColor: '#5c7a4b',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.2,
         shadowRadius: 8,

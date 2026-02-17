@@ -27,7 +27,7 @@ export const ActivitiesScreen = () => {
 
     const activityTypes: Record<string, { icon: string; label: string; color: string; bg: string }> = {
         walk: { icon: '🚶', label: 'Paseo', color: '#4a90e2', bg: '#eef6ff' },
-        play: { icon: '🎾', label: 'Juego', color: '#7c9a6b', bg: '#f0f5ee' },
+        play: { icon: '🎾', label: 'Juego', color: '#5c7a4b', bg: '#f0f5ee' },
         training: { icon: '🎯', label: 'Entrenamiento', color: '#9b59b6', bg: '#f5eef8' },
         exercise: { icon: '💪', label: 'Ejercicio', color: '#e67e22', bg: '#fdf5ee' },
         social: { icon: '🐕', label: 'Socialización', color: '#e91e63', bg: '#fdeef3' },
@@ -42,7 +42,7 @@ export const ActivitiesScreen = () => {
                 </TouchableOpacity>
                 <Text style={styles.navTitle}>Actividades</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AddActivity', { petId })}>
-                    <Ionicons name="add-circle" size={28} color="#7c9a6b" />
+                    <Ionicons name="add-circle" size={28} color="#5c7a4b" />
                 </TouchableOpacity>
             </View>
         </View>
@@ -51,7 +51,7 @@ export const ActivitiesScreen = () => {
     if (isLoading) {
         return (
             <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#7c9a6b" />
+                <ActivityIndicator size="large" color="#5c7a4b" />
             </View>
         );
     }
@@ -153,13 +153,13 @@ const styles = StyleSheet.create({
     activityInfo: { flex: 1 },
     activityHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
     activityTitle: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-    durationText: { fontSize: 13, fontWeight: '600', color: '#7c9a6b' },
+    durationText: { fontSize: 13, fontWeight: '600', color: '#5c7a4b' },
     notesText: { fontSize: 13, color: '#666', marginBottom: 6 },
     footerRow: { flexDirection: 'row', alignItems: 'center' },
     dateText: { fontSize: 11, color: '#999', marginLeft: 4, textTransform: 'capitalize' },
     emptyContainer: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 40 },
     emptyText: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 15 },
     emptySubtext: { fontSize: 14, color: '#666', marginTop: 8, textAlign: 'center' },
-    emptyButton: { marginTop: 25, backgroundColor: '#7c9a6b', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 25 },
+    emptyButton: { marginTop: 25, backgroundColor: '#5c7a4b', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 25 },
     emptyButtonText: { color: '#fff', fontWeight: 'bold' }
 });

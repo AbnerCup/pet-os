@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
-import { PawPrint, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Logo } from '@/components/Logo'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -25,8 +26,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-stone-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-sage-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <PawPrint className="w-8 h-8 text-white" />
+          <div className="flex justify-center mb-4">
+            <Logo showText={false} size="lg" href="" />
           </div>
           <h1 className="text-2xl font-bold text-sage-900">Bienvenido de vuelta</h1>
           <p className="text-stone-600">Inicia sesión en Pet OS</p>

@@ -13,6 +13,7 @@ import remindersRoutes from './reminders'
 import uploadRoutes from './upload'
 import chatbotRoutes from './chatbot'
 import emergencyRoutes from './emergency'
+import logsRoutes from './logs'
 
 const router = Router()
 
@@ -29,7 +30,6 @@ router.use('/api/reminders', remindersRoutes)
 router.use('/api/upload', uploadRoutes)
 router.use('/api/chatbot', chatbotRoutes)
 router.use('/api/sos', emergencyRoutes)
-
-
+router.use('/api/logs', logsRoutes)
 
 export default router

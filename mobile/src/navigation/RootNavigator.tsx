@@ -23,6 +23,7 @@ import { ActivitiesScreen } from '../screens/activities/ActivitiesScreen';
 import { AddActivityScreen } from '../screens/activities/AddActivityScreen';
 import { AgendaScreen } from '../screens/pets/AgendaScreen';
 import { PetTrackingScreen } from '../screens/location/PetTrackingScreen';
+import { DevLogsScreen } from '../screens/profile/DevLogsScreen';
 
 import { RootStackParamList } from './types';
 
@@ -131,6 +132,11 @@ export const RootNavigator: React.FC = () => {
                 name="PetTracking"
                 component={PetTrackingScreen}
                 options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="DevLogs"
+                component={DevLogsScreen}
+                options={{ title: 'Logs de Desarrollo' }}
               />
             </Stack.Group>
           </>

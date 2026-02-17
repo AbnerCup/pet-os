@@ -21,6 +21,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadApi } from '../../api/endpoints';
+import { useLogger } from '../../hooks/useLogger';
 
 const SPECIES = [
     { id: 'dog', label: 'Perro', icon: 'paw' },
@@ -34,6 +35,9 @@ export const AddPetScreen = () => {
     const { user } = useAuth();
     const { data: pets } = usePets();
     const createPetMutation = useCreatePet();
+    
+    // Usar el logger - funciona igual en desarrollo y APK
+    const { debug, info, error } = useLogger({ screenName: 'AddPetScreen' });
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [date, setDate] = useState(new Date());
@@ -60,7 +64,8 @@ export const AddPetScreen = () => {
     const maxPets = user?.plan === 'FREE' ? 1 : user?.plan === 'BASIC' ? 3 : 999;
     const canAddMore = petCount < maxPets;
 
-    console.log('[DEBUG] AddPetScreen State:', {
+    // Log de estado - se verá en consola en dev, se enviará al servidor en APK
+    debug('Estado de pantalla', {
         petCount,
         maxPets,
         plan: user?.plan,
@@ -113,16 +118,24 @@ export const AddPetScreen = () => {
                 }
             }
 
+            info('Registrando mascota', { name: formData.name, species: formData.species });
+            
             await createPetMutation.mutateAsync({
                 ...formData,
                 weight: formData.weight ? parseFloat(formData.weight) : undefined,
                 photoUrl: photoUrl || undefined,
             });
+            
+            info('Mascota registrada exitosamente', { name: formData.name });
             Alert.alert('¡Bienvenido!', `${formData.name} ya es parte de la familia Pet OS`);
             navigation.goBack();
-        } catch (error: any) {
-            console.error('[AddPetError]', error.response?.data || error.message);
-            const errorMessage = error.response?.data?.error || 'No se pudo registrar la mascota. Verifica los datos.';
+        } catch (err: any) {
+            error('Error al registrar mascota', { 
+                message: err.message, 
+                response: err.response?.data,
+                formData: { name: formData.name, species: formData.species }
+            });
+            const errorMessage = err.response?.data?.error || 'No se pudo registrar la mascota. Verifica los datos.';
             Alert.alert('Error', errorMessage);
         } finally {
             setIsUploading(false);

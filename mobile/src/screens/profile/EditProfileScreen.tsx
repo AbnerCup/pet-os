@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootStackScreenProps } from '../../navigation/types';
 import { useAuth } from '../../hooks/useAuth';
 import { userApi } from '../../api/endpoints';
+import { useLogger } from '../../hooks/useLogger';
 
 export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = ({ navigation }) => {
     const { user, checkAuth } = useAuth();
@@ -11,6 +12,7 @@ export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = 
     const [email, setEmail] = useState(user?.email || '');
     const [phone, setPhone] = useState(user?.phone || '');
     const [isSaving, setIsSaving] = useState(false);
+    const { error } = useLogger({ screenName: 'EditProfileScreen' });
 
     const handleSave = async () => {
         if (!name.trim()) {
@@ -25,8 +27,11 @@ export const EditProfileScreen: React.FC<RootStackScreenProps<'EditProfile'>> = 
             Alert.alert('Éxito', 'Perfil actualizado correctamente', [
                 { text: 'OK', onPress: () => navigation.goBack() }
             ]);
-        } catch (error: any) {
-            console.error('Update profile error:', error.response?.data || error.message);
+        } catch (err: any) {
+            error('Error actualizando perfil', { 
+                response: err.response?.data, 
+                message: err.message 
+            });
             Alert.alert('Error', 'No se pudo actualizar el perfil. Intenta de nuevo.');
         } finally {
             setIsSaving(false);

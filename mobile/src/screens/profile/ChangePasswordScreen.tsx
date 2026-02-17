@@ -3,13 +3,14 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAr
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackScreenProps } from '../../navigation/types';
 import { userApi } from '../../api/endpoints';
+import { useLogger } from '../../hooks/useLogger';
 
 export const ChangePasswordScreen: React.FC<RootStackScreenProps<'ChangePassword'>> = ({ navigation }) => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
     const [isSaving, setIsSaving] = useState(false);
+    const { error } = useLogger({ screenName: 'ChangePasswordScreen' });
 
     const handleSave = async () => {
         if (!currentPassword || !newPassword || !confirmPassword) {
@@ -33,9 +34,12 @@ export const ChangePasswordScreen: React.FC<RootStackScreenProps<'ChangePassword
             Alert.alert('Éxito', 'Contraseña actualizada correctamente', [
                 { text: 'OK', onPress: () => navigation.goBack() }
             ]);
-        } catch (error: any) {
-            console.error('Change password error:', error.response?.data || error.message);
-            const errorMessage = error.response?.data?.error || 'No se pudo cambiar la contraseña. Verifica tu contraseña actual.';
+        } catch (err: any) {
+            error('Error cambiando contraseña', { 
+                response: err.response?.data, 
+                message: err.message 
+            });
+            const errorMessage = err.response?.data?.error || 'No se pudo cambiar la contraseña. Verifica tu contraseña actual.';
             Alert.alert('Error', errorMessage);
         } finally {
             setIsSaving(false);

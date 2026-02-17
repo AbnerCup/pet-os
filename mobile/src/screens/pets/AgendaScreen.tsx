@@ -17,6 +17,7 @@ import { useHealth } from '../../hooks/useHealth';
 import { healthApi } from '../../api/endpoints';
 import { RootStackParamList } from '../../navigation/types';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLogger } from '../../hooks/useLogger';
 
 type AgendaRouteProp = RouteProp<RootStackParamList, 'Agenda'>;
 
@@ -25,6 +26,7 @@ export const AgendaScreen = () => {
     const route = useRoute<AgendaRouteProp>();
     const { petId, petName } = route.params;
     const queryClient = useQueryClient();
+    const { error } = useLogger({ screenName: 'AgendaScreen' });
 
     const { data: records, isLoading, refetch } = useHealth({ petId });
 
@@ -38,8 +40,8 @@ export const AgendaScreen = () => {
             });
             queryClient.invalidateQueries({ queryKey: ['health'] });
             queryClient.invalidateQueries({ queryKey: ['pets'] });
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            error('Error marcando registro como completado', err);
             Alert.alert('Error', 'No se pudo marcar como completado');
         } finally {
             setIsCompleting(null);

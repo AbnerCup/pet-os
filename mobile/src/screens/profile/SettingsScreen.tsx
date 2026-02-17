@@ -63,6 +63,15 @@ export const SettingsScreen: React.FC<RootStackScreenProps<'Settings'>> = ({ nav
                     {renderSettingItem('moon-outline', 'Modo Oscuro', undefined, darkMode, setDarkMode, '#34495e')}
                 </View>
 
+                {/* Sección de Desarrollo - solo visible en modo desarrollo */}
+                {__DEV__ && (
+                    <View style={sectionStyles.section}>
+                        <Text style={styles.sectionTitle}>Desarrollo</Text>
+                        {renderSettingItem('bug-outline', 'Ver Logs de Desarrollo', () => navigation.navigate('DevLogs'), undefined, undefined, '#e74c3c')}
+                        {renderSettingItem('code-outline', 'Modo: DESARROLLO', () => {}, undefined, undefined, '#2ecc71')}
+                    </View>
+                )}
+
                 <View style={sectionStyles.section}>
                     <Text style={styles.sectionTitle}>Más información</Text>
                     {renderSettingItem('information-circle-outline', 'Acerca de Pet OS', () => { }, undefined, undefined, '#666')}

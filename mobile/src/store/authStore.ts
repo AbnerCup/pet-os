@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../types';
 import { authApi } from '../api/endpoints';
+import { logger } from '../utils/logger';
 
 interface AuthState {
   user: User | null;
@@ -48,7 +49,10 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
         } catch (error: any) {
-          console.error('Login error details:', error.response?.data);
+          logger.error('Login error details', { 
+            error: error.response?.data,
+            email 
+          });
           set({
             error: error.response?.data?.error || error.response?.data?.message || 'Error al iniciar sesión',
             isLoading: false,

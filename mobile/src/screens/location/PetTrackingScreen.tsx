@@ -21,6 +21,7 @@ import { usePet } from '../../hooks/usePets';
 import { useCreateLocation } from '../../hooks/useLocation';
 import { locationApi } from '../../api/endpoints';
 import { getPetImage } from '../../utils/helpers';
+import { useLogger } from '../../hooks/useLogger';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ export const PetTrackingScreen = () => {
     const { data: pet, isLoading: isPetLoading } = usePet(petId);
     const createLocationMutation = useCreateLocation();
     const mapRef = useRef<MapView>(null);
+    const { debug, info, error } = useLogger({ screenName: 'PetTrackingScreen' });
 
     const [currentLocation, setCurrentLocation] = useState<any>(null);
     const [locationHistory, setLocationHistory] = useState<any[]>([]);
@@ -70,8 +72,8 @@ export const PetTrackingScreen = () => {
                 setLocationHistory(historyData);
             }
 
-        } catch (error) {
-            console.error('Error fetching tracking data:', error);
+        } catch (err) {
+            error('Error al obtener datos de tracking', err);
         } finally {
             setIsLoading(false);
         }
@@ -149,12 +151,12 @@ export const PetTrackingScreen = () => {
                                 });
                             }
                         } catch (err) {
-                            console.error("Error enviando ubicación:", err);
+                            error('Error enviando ubicación al servidor', err);
                         }
                     }
                 );
             } catch (err) {
-                console.error("Error iniciando watcher:", err);
+                error('Error iniciando servicio de ubicación', err);
                 setIsTracking(false);
                 Alert.alert("Error", "No se pudo iniciar el servicio de ubicación.");
             }

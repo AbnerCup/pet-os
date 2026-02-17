@@ -61,6 +61,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        <meta name="theme-color" content="#7c9a6b" />
+      </head>
       <body className="antialiased">
         <AuthProvider>
           <AppContent>{children}</AppContent>

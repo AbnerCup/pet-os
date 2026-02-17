@@ -19,6 +19,7 @@ import { es } from 'date-fns/locale';
 import { usePets } from '../../hooks/usePets';
 import { useAddActivity } from '../../hooks/useActivities';
 import { RootStackParamList } from '../../navigation/types';
+import { useLogger } from '../../hooks/useLogger';
 
 type AddActivityRouteProp = RouteProp<RootStackParamList, 'AddActivity'>;
 
@@ -26,6 +27,7 @@ export const AddActivityScreen = () => {
     const navigation = useNavigation<any>();
     const route = useRoute<AddActivityRouteProp>();
     const { petId: initialPetId } = route.params || {};
+    const { error } = useLogger({ screenName: 'AddActivityScreen' });
 
     const { data: pets } = usePets();
     const addActivityMutation = useAddActivity();
@@ -67,8 +69,8 @@ export const AddActivityScreen = () => {
             });
             Alert.alert('¡Éxito!', 'Actividad registrada correctamente');
             navigation.goBack();
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            error('Error guardando actividad', err);
             Alert.alert('Error', 'No se pudo guardar la actividad');
         } finally {
             setIsSubmitting(false);

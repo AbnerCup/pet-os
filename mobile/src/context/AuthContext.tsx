@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../types';
 import { authApi } from '../api/endpoints';
+import { logger } from '../utils/logger';
 
 interface AuthContextType {
   user: User | null;
@@ -29,7 +30,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser(response.data);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      logger.error('Auth check failed', error);
     } finally {
       setIsLoading(false);
     }

@@ -22,6 +22,7 @@ export type RootStackParamList = {
   AddActivity: { petId?: string };
   Agenda: { petId: string; petName: string };
   PetTracking: { petId: string };
+  DevLogs: undefined;
 };
 
 // Main Tab Param List

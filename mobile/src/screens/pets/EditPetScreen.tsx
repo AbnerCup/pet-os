@@ -17,6 +17,7 @@ import { usePet } from '../../hooks/usePets';
 import { petsApi, uploadApi } from '../../api/endpoints';
 import { useQueryClient } from '@tanstack/react-query';
 import { getPetImage } from '../../utils/helpers';
+import { useLogger } from '../../hooks/useLogger';
 
 export const EditPetScreen = () => {
     const route = useRoute<any>();
@@ -24,6 +25,7 @@ export const EditPetScreen = () => {
     const queryClient = useQueryClient();
     const { petId } = route.params;
     const { data: pet, isLoading: isFetching } = usePet(petId);
+    const { error } = useLogger({ screenName: 'EditPetScreen' });
 
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -107,8 +109,12 @@ export const EditPetScreen = () => {
             queryClient.invalidateQueries({ queryKey: ['pet', petId] });
             Alert.alert('Éxito', 'Mascota actualizada correctamente');
             navigation.goBack();
-        } catch (error: any) {
-            console.error('[EditPetError]', error.response?.data || error.message);
+        } catch (err: any) {
+            error('Error actualizando mascota', { 
+                petId, 
+                response: err.response?.data, 
+                message: err.message 
+            });
             Alert.alert('Error', 'No se pudo actualizar la mascota. Verifica tu conexión a internet.');
         } finally {
             setLoading(false);
